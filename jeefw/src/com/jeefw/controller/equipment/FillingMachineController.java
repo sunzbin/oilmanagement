@@ -1,12 +1,16 @@
 package com.jeefw.controller.equipment;
 
 import java.io.IOException;
+import java.io.OutputStream;
+import java.net.URLDecoder;
 import java.util.HashMap;
 import java.util.Map;
 
+import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.apache.commons.beanutils.ConvertUtils;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -31,14 +35,15 @@ import net.sf.json.JSONObject;
  * @author:liangyingnan
  */
 @Controller
-@RequestMapping("/fillingMachine")
+@RequestMapping("/filling")
 public class FillingMachineController extends JavaEEFrameworkBaseController<FillingMachine> implements Constant {
 
-	@Autowired
+	@Resource
 	private FillingMachineService fillingMachineService;
 
+	// 查询字典的表格，包括分页、搜索和排序
 	@RequestMapping(value = "/getMachineInfo", method = { RequestMethod.POST, RequestMethod.GET })
-	public void getRole(HttpServletRequest request, HttpServletResponse response) throws Exception {
+	public void getMachineInfo(HttpServletRequest request, HttpServletResponse response) throws Exception {
 		Integer firstResult = Integer.valueOf(request.getParameter("page"));
 		Integer maxResults = Integer.valueOf(request.getParameter("rows"));
 		String sortedObject = request.getParameter("sidx");
@@ -48,6 +53,20 @@ public class FillingMachineController extends JavaEEFrameworkBaseController<Fill
 		if (StringUtils.isNotBlank(filters)) {
 			JSONObject jsonObject = JSONObject.fromObject(filters);
 			JSONArray jsonArray = (JSONArray) jsonObject.get("rules");
+			for (int i = 0; i < jsonArray.size(); i++) {
+				JSONObject result = (JSONObject) jsonArray.get(i);
+				if (result.getString("field").equals("fillingMachineKey") && result.getString("op").equals("eq")) {
+					fillingMachine.set$eq_fillingMachineKey(result.getString("data"));
+				}
+				if (result.getString("field").equals("fillingMachineValue") && result.getString("op").equals("cn")) {
+					fillingMachine.set$like_fillingMachineValue(result.getString("data"));
+				}
+			}
+			if (((String) jsonObject.get("groupOp")).equalsIgnoreCase("OR")) {
+				fillingMachine.setFlag("OR");
+			} else {
+				fillingMachine.setFlag("AND");
+			}
 		}
 		fillingMachine.setFirstResult((firstResult - 1) * maxResults);
 		fillingMachine.setMaxResults(maxResults);
@@ -55,31 +74,47 @@ public class FillingMachineController extends JavaEEFrameworkBaseController<Fill
 		sortedCondition.put(sortedObject, sortedValue);
 		fillingMachine.setSortedConditions(sortedCondition);
 		QueryResult<FillingMachine> queryResult = fillingMachineService.doPaginationQuery(fillingMachine);
-		JqGridPageView<FillingMachine> roleListView = new JqGridPageView<FillingMachine>();
-		roleListView.setMaxResults(maxResults);
-		roleListView.setRows(queryResult.getResultList());
-		roleListView.setRecords(queryResult.getTotalCount());
-		writeJSON(response, roleListView);
+		JqGridPageView<FillingMachine> dictListView = new JqGridPageView<FillingMachine>();
+		dictListView.setMaxResults(maxResults);
+		dictListView.setRows(queryResult.getResultList());
+		dictListView.setRecords(queryResult.getTotalCount());
+		writeJSON(response, dictListView);
 	}
 
-
-	// 删除角色
-	@RequestMapping("/deleteFillingMachine")
-	public void deleteRole(HttpServletRequest request, HttpServletResponse response, @RequestParam("ids") Long[] ids) throws IOException {
-		boolean flag = false;
-		for (int i = 0; i < ids.length; i++) {
-			Long id = ids[i];
-			fillingMachineService.deleteByPK(ids);
-			flag = fillingMachineService.deleteByPK(id);
+	// 操作字典的删除、导出Excel、字段判断和保存
+	@RequestMapping(value = "/operateFillingMachine", method = { RequestMethod.POST, RequestMethod.GET })
+	public void operateDict(HttpServletRequest request, HttpServletResponse response) throws Exception {
+		String oper = request.getParameter("oper");
+		String id = request.getParameter("id");
+		if (oper.equals("del")) {
+			String[] ids = id.split(",");
+			deleteFillingMachine(request, response, (Long[]) ConvertUtils.convert(ids, Long.class));
+		} else if (oper.equals("excel")) {
+			response.setContentType("application/msexcel;charset=UTF-8");
+			try {
+				response.addHeader("Content-Disposition", "attachment;filename=file.xls");
+				OutputStream out = response.getOutputStream();
+				out.write(URLDecoder.decode(request.getParameter("csvBuffer"), "UTF-8").getBytes());
+				out.flush();
+				out.close();
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+		} else {
+			
 		}
+	}
+	
+	// 删除字典
+	@RequestMapping("/deleteFillingMachine")
+	public void deleteFillingMachine(HttpServletRequest request, HttpServletResponse response, @RequestParam("ids") Long[] ids) throws IOException {
+		boolean flag = fillingMachineService.deleteByPK(ids);
 		if (flag) {
 			writeJSON(response, "{success:true}");
 		} else {
 			writeJSON(response, "{success:false}");
 		}
 	}
-
-
 
 
 

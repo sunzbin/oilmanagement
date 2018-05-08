@@ -11,7 +11,7 @@
 		<table id="grid-table"></table>
 
 		<div id="grid-pager"></div>
-		
+
 		<script type="text/javascript">
 			var $path_base = "${contextPath}/static";//in Ace demo this will be used for editurl parameter
 		</script>
@@ -46,10 +46,10 @@
 
         		jQuery(grid_selector).jqGrid({
         			subGrid : false,
-        			url : "${contextPath}/sys/department/getDepartment",
+        			url : "${contextPath}/filling/getMachineInfo",
         			datatype : "json",
         			height : 450,
-        			colNames : ['', 'ID', '部门编码', '部门名称', '上级部门', '部门描述'],
+        			colNames : ['', 'ID', '所属机构', '产品型号', '产品编码', '设备号','电量','运行状态','设备状态'],
         			colModel : [ {
         				name : '',
         				index : '',
@@ -75,42 +75,69 @@
         				sorttype : "long",
         				search : false
         			}, {
-        				name : 'departmentKey',
-        				index : 'departmentKey',
-        				label : '部门编码',
+        				name : 'affiliatedInstitutions',
+        				index : 'affiliatedInstitutions',
+        				label : '所属机构',
         				width : 120,
         				editable : true,
         				editoptions : {size : "20", maxlength : "20"},
         				searchoptions : {sopt : ['eq']},
         				editrules : {required : true}
         			}, {
-        				name : 'departmentValue',
-        				index : 'departmentValue',
-        				label : '部门名称',
+        				name : 'productModel',
+        				index : 'productModel',
+        				label : '产品型号',
         				width : 160,
         				editable : true,
         				editoptions : {size : "20", maxlength : "40"},
         				searchoptions : {sopt : ['cn']},
         				editrules : {required : true}
         			}, {
-        				name : 'parentDepartmentValue',
-        				index : 'parentDepartmentkey',
-        				label : '上级部门',
+        				name : 'productCoding',
+        				index : 'productCoding',
+        				label : '产品编码',
+        				width : 100,
+        				editable : true,
+        				editoptions : {size : "20", maxlength : "40"},
+        				searchoptions : {sopt : ['cn']},
+        				editrules : {required : true}
+        			}, {
+        				name : 'equipmentNumber',
+        				index : 'equipmentNumber',
+        				label : '设备号',
         				width : 110,
         				editable : true,
-        				edittype : "select",
-        				editoptions : {dataUrl : "${contextPath}/sys/department/getDepartmentSelectNoSelfList", title : "如果没有上级，不选即可"},
-        				search : false
+        				editoptions : {size : "20", maxlength : "40"},
+        				searchoptions : {sopt : ['cn']},
+        				editrules : {required : true}
         			}, {
-        				name : 'description',
-        				index : 'description',
-        				label : '部门描述',
-        				width : 200,
+        				name : 'electricQuantity',
+        				index : 'electricQuantity',
+        				label : '电量',
+        				width : 100,
         				editable : true,
-        				search : false,
-        				edittype : 'textarea', 
-        				editoptions : {rows : "2", cols : "18", maxlength : "200"}
-        			} ],
+        				editoptions : {size : "20", maxlength : "40"},
+        				searchoptions : {sopt : ['cn']},
+        				editrules : {required : true}
+        			}, {
+        				name : 'runningState',
+        				index : 'runningState',
+        				label : '运行状态',
+        				width : 100,
+        				editable : true,
+        				editoptions : {size : "20", maxlength : "40"},
+        				searchoptions : {sopt : ['cn']},
+        				editrules : {required : true}
+        			},{
+        				name : 'equipmentState',
+        				index : 'equipmentState',
+        				label : '设备状态',
+        				width : 100,
+        				editable : true,
+        				editoptions : {size : "20", maxlength : "40"},
+        				searchoptions : {sopt : ['cn']},
+        				editrules : {required : true}
+        			}],
         			//scroll : 1, // set the scroll property to 1 to enable paging with scrollbar - virtual loading of records
         			sortname : "id",
         			sortorder : "asc",
@@ -132,7 +159,7 @@
         					enableTooltips(table);
         				}, 0);
         			},
-        			editurl : "${contextPath}/sys/department/operateDepartment"
+        			editurl : "${contextPath}/filling/operateFillingMachine"
         			//caption : "用户管理列表",
         			//autowidth : true,
         			/**
@@ -160,17 +187,17 @@
         		
         		// navButtons
         		jQuery(grid_selector).jqGrid('navGrid', pager_selector, { // navbar options
-        			edit : <shiro:hasPermission name="${ROLE_KEY}:department:edit">true</shiro:hasPermission><shiro:lacksPermission name="${ROLE_KEY}:department:edit">false</shiro:lacksPermission>,
+        			edit : <shiro:hasPermission name="${ROLE_KEY}:filling:edit">true</shiro:hasPermission><shiro:lacksPermission name="${ROLE_KEY}:filling:edit">false</shiro:lacksPermission>,
         			editicon : 'ace-icon fa fa-pencil blue',
-        			add : <shiro:hasPermission name="${ROLE_KEY}:department:add">true</shiro:hasPermission><shiro:lacksPermission name="${ROLE_KEY}:department:add">false</shiro:lacksPermission>,
+        			add : <shiro:hasPermission name="${ROLE_KEY}:filling:add">true</shiro:hasPermission><shiro:lacksPermission name="${ROLE_KEY}:filling:add">false</shiro:lacksPermission>,
         			addicon : 'ace-icon fa fa-plus-circle purple',
-        			del : <shiro:hasPermission name="${ROLE_KEY}:department:delete">true</shiro:hasPermission><shiro:lacksPermission name="${ROLE_KEY}:department:delete">false</shiro:lacksPermission>,
+        			del : <shiro:hasPermission name="${ROLE_KEY}:filling:delete">true</shiro:hasPermission><shiro:lacksPermission name="${ROLE_KEY}:filling:delete">false</shiro:lacksPermission>,
         			delicon : 'ace-icon fa fa-trash-o red',
-        			search : <shiro:hasPermission name="${ROLE_KEY}:department:search">true</shiro:hasPermission><shiro:lacksPermission name="${ROLE_KEY}:department:search">false</shiro:lacksPermission>,
+        			search : <shiro:hasPermission name="${ROLE_KEY}:filling:search">true</shiro:hasPermission><shiro:lacksPermission name="${ROLE_KEY}:filling:search">false</shiro:lacksPermission>,
         			searchicon : 'ace-icon fa fa-search orange',
         			refresh : true,
         			refreshicon : 'ace-icon fa fa-refresh blue',
-        			view : <shiro:hasPermission name="${ROLE_KEY}:department:view">true</shiro:hasPermission><shiro:lacksPermission name="${ROLE_KEY}:department:view">false</shiro:lacksPermission>,
+        			view : <shiro:hasPermission name="${ROLE_KEY}:filling:view">true</shiro:hasPermission><shiro:lacksPermission name="${ROLE_KEY}:filling:view">false</shiro:lacksPermission>,
         			viewicon : 'ace-icon fa fa-search-plus grey'
         		}, {
         			// edit record form
@@ -240,7 +267,7 @@
         		})
         		
         		// add custom button to export the data to excel
-        		if(<shiro:hasPermission name="${ROLE_KEY}:department:export">true</shiro:hasPermission><shiro:lacksPermission name="${ROLE_KEY}:department:export">false</shiro:lacksPermission>){
+        		if(<shiro:hasPermission name="${ROLE_KEY}:dict:export">true</shiro:hasPermission><shiro:lacksPermission name="${ROLE_KEY}:dict:export">false</shiro:lacksPermission>){
     				jQuery(grid_selector).jqGrid('navButtonAdd', pager_selector,{
    					   caption : "",
    				       title : "导出Excel",
@@ -262,7 +289,7 @@
    				    	   	   rows = rows + "\n"; // output each row with end of line
    				    	   }
    				    	   rows = rows + "\n"; // end of line at the end
-   				    	   var form = "<form name='csvexportform' action='${contextPath}/sys/department/operateDepartment?oper=excel' method='post'>";
+   				    	   var form = "<form name='csvexportform' action='${contextPath}/sys/dict/operateDict?oper=excel' method='post'>";
    				    	   form = form + "<input type='hidden' name='csvBuffer' value='" + encodeURIComponent(rows) + "'>";
    				    	   form = form + "</form><script>document.csvexportform.submit();</sc" + "ript>";
    				    	   OpenWindow = window.open('', '');

@@ -619,7 +619,7 @@ public class SysUserController extends JavaEEFrameworkBaseController<SysUser> im
 		return "back/druid";
 	}
 	
-	@RequestMapping("/fillingMachine")
+	@RequestMapping("/filling")
 	public String fillingMachine(HttpServletRequest request, HttpServletResponse response) throws IOException {
 		return "back/equipment/filling_machine";
 	}

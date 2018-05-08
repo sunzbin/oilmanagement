@@ -86,16 +86,6 @@ public class FillingMachine extends FillingMachineParameter{
 	public FillingMachine() {
 	}
 
-	public FillingMachine(Long affiliatedInstitutions, String productModel, String productCoding, String equipmentNumber, String electricQuantity, String runningState, String equipmentState) {
-		this.affiliatedInstitutions = affiliatedInstitutions;
-		this.productModel = productModel;
-		this.productCoding = productCoding;
-		this.equipmentNumber = equipmentNumber;
-		this.electricQuantity = electricQuantity;
-		this.runningState = runningState;
-		this.equipmentState = equipmentState;
-	}
-
 	public Long getId() {
 		return id;
 	}
@@ -159,4 +149,75 @@ public class FillingMachine extends FillingMachineParameter{
 	public void setEquipmentState(String equipmentState) {
 		this.equipmentState = equipmentState;
 	}
+
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + ((affiliatedInstitutions == null) ? 0 : affiliatedInstitutions.hashCode());
+		result = prime * result + ((electricQuantity == null) ? 0 : electricQuantity.hashCode());
+		result = prime * result + ((equipmentNumber == null) ? 0 : equipmentNumber.hashCode());
+		result = prime * result + ((equipmentState == null) ? 0 : equipmentState.hashCode());
+		result = prime * result + ((id == null) ? 0 : id.hashCode());
+		result = prime * result + ((productCoding == null) ? 0 : productCoding.hashCode());
+		result = prime * result + ((productModel == null) ? 0 : productModel.hashCode());
+		result = prime * result + ((runningState == null) ? 0 : runningState.hashCode());
+		return result;
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		FillingMachine other = (FillingMachine) obj;
+		if (affiliatedInstitutions == null) {
+			if (other.affiliatedInstitutions != null)
+				return false;
+		} else if (!affiliatedInstitutions.equals(other.affiliatedInstitutions))
+			return false;
+		if (electricQuantity == null) {
+			if (other.electricQuantity != null)
+				return false;
+		} else if (!electricQuantity.equals(other.electricQuantity))
+			return false;
+		if (equipmentNumber == null) {
+			if (other.equipmentNumber != null)
+				return false;
+		} else if (!equipmentNumber.equals(other.equipmentNumber))
+			return false;
+		if (equipmentState == null) {
+			if (other.equipmentState != null)
+				return false;
+		} else if (!equipmentState.equals(other.equipmentState))
+			return false;
+		if (id == null) {
+			if (other.id != null)
+				return false;
+		} else if (!id.equals(other.id))
+			return false;
+		if (productCoding == null) {
+			if (other.productCoding != null)
+				return false;
+		} else if (!productCoding.equals(other.productCoding))
+			return false;
+		if (productModel == null) {
+			if (other.productModel != null)
+				return false;
+		} else if (!productModel.equals(other.productModel))
+			return false;
+		if (runningState == null) {
+			if (other.runningState != null)
+				return false;
+		} else if (!runningState.equals(other.runningState))
+			return false;
+		return true;
+	}
+	
+	
+	
+	
 }
