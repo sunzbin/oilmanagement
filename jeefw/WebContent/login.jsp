@@ -6,9 +6,9 @@
 	<head>
 		<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
 		<meta charset="utf-8" />
-		<title>Java企业通用开发平台框架 - 登录</title>
+		<title>智能油脂加注系统采集管理平台 - 登录</title>
 
-		<meta name="description" content="Java企业通用开发平台框架 |登录页面" />
+		<meta name="description" content="智能油脂加注系统采集管理平台" />
 		<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0" />
 
 		<!-- bootstrap & fontawesome -->
@@ -37,9 +37,9 @@
 		<![endif]-->
 	</head>
 
-	<body class="login-layout light-login">
+	<body class="login-layout light-login" style="background-size:1400px;">
 		<div class="main-container">
-			<div class="main-content">
+			<div class="main-content" style="margin-top:100px;">
 				<div class="row">
 					<div class="col-sm-10 col-sm-offset-1">
 						<div class="login-container">
@@ -58,7 +58,7 @@
 										<div class="widget-main">
 											<h4 class="header blue lighter bigger">
 												<i class="ace-icon fa fa-coffee green"></i>
-												登录Java企业通用开发平台框架
+												智能油脂加注系统采集管理平台
 											</h4>
 
 											<div class="space-6"></div>
@@ -107,7 +107,7 @@
 										</div><!-- /.widget-main -->
 
 										<div class="toolbar clearfix">
-											<div>
+											<!-- <div>
 												<a href="#" data-target="#forgot-box" class="forgot-password-link">
 													<i class="ace-icon fa fa-arrow-left"></i>
 													忘记密码？
@@ -120,6 +120,7 @@
 													<i class="ace-icon fa fa-arrow-right"></i>
 												</a>
 											</div>
+											 -->
 										</div>
 									</div><!-- /.widget-body -->
 								</div><!-- /.login-box -->
@@ -176,7 +177,7 @@
 										<div class="widget-main">
 											<h4 class="header green lighter bigger">
 												<i class="ace-icon fa fa-users blue"></i>
-												注册Java企业通用开发平台框架
+												智能油脂加注系统后台采集和管理平台
 											</h4>
 
 											<div class="space-6"></div>
@@ -280,7 +281,7 @@
 								</div><!-- /.signup-box -->
 							</div><!-- /.position-relative -->
 							<div class="navbar-fixed-top align-right">
-								<br />
+								<!-- <br />
 								&nbsp;
 								<a id="btn-login-dark" href="#">花瓣</a>
 								&nbsp;
@@ -291,7 +292,7 @@
 								<span class="blue">/</span>
 								&nbsp;
 								<a id="btn-login-light" href="#">阳光</a>
-								&nbsp; &nbsp; &nbsp;
+								&nbsp; &nbsp; &nbsp; -->
 							</div>
 						</div>
 					</div><!-- /.col -->
@@ -302,11 +303,11 @@
                     <!-- #section:basics/footer -->
                     <div class="footer-content-nobordertop">
                         <span class="bigger-120">
-                            <span class="blue bolder">
-                                                                                                研发中心
+                            <span>
+                                                                                  兰州运通铁路科技有限责任公司
                             </span>
                             &copy; 
-                            2015-2017
+                            2018
                         </span>
                     </div>
                     <!-- /section:basics/footer -->
