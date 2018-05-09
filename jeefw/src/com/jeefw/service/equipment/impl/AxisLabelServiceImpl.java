@@ -1,9 +1,15 @@
 package com.jeefw.service.equipment.impl;
 
+import javax.annotation.Resource;
+
+import org.springframework.stereotype.Service;
+
+import com.jeefw.dao.equipment.AxisLabelDao;
+import com.jeefw.dao.equipment.FillingMachineDao;
 import com.jeefw.model.equipment.AxisLabel;
 import com.jeefw.service.equipment.AxisLabelService;
+
 import core.service.BaseService;
-import org.springframework.stereotype.Service;
 
 /**
  * @Title:
@@ -14,7 +20,13 @@ import org.springframework.stereotype.Service;
 @Service
 public class AxisLabelServiceImpl extends BaseService<AxisLabel> implements AxisLabelService {
 
-
+private AxisLabelDao axisLabelDao;
+	
+	@Resource
+	public void setDictDao(AxisLabelDao axisLabelDao) {
+		this.axisLabelDao = axisLabelDao;
+		this.dao = axisLabelDao;
+	}
 
 
 

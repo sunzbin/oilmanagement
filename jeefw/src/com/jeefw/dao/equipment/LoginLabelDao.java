@@ -1,6 +1,6 @@
 package com.jeefw.dao.equipment;
 
-import com.jeefw.model.equipment.LabelDetail;
+import com.jeefw.model.equipment.LoginLabel;
 import core.dao.Dao;
 
 /**
@@ -9,7 +9,7 @@ import core.dao.Dao;
  * @Date:2018-05-04 上午 11:11
  * @author:liangyingnan
  */
-public interface LabelDetailDao extends Dao<LabelDetail> {
+public interface LoginLabelDao extends Dao<LoginLabel> {
 
 
 

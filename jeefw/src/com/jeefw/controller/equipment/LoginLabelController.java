@@ -2,7 +2,7 @@ package com.jeefw.controller.equipment;
 
 import com.jeefw.core.Constant;
 import com.jeefw.core.JavaEEFrameworkBaseController;
-import com.jeefw.model.equipment.LabelDetail;
+import com.jeefw.model.equipment.LoginLabel;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 
@@ -14,6 +14,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
  */
 @Controller
 @RequestMapping("labelDetail")
-public class LabelDetailController extends JavaEEFrameworkBaseController<LabelDetail> implements Constant {
+public class LoginLabelController extends JavaEEFrameworkBaseController<LoginLabel> implements Constant {
 
 }
