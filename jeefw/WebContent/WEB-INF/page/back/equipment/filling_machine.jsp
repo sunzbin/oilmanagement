@@ -187,17 +187,17 @@
         		
         		// navButtons
         		jQuery(grid_selector).jqGrid('navGrid', pager_selector, { // navbar options
-        			edit : <shiro:hasPermission name="${ROLE_KEY}:filling:edit">true</shiro:hasPermission><shiro:lacksPermission name="${ROLE_KEY}:filling:edit">false</shiro:lacksPermission>,
+        			edit : <shiro:hasPermission name="${ROLE_KEY}:fillingmachine:edit">true</shiro:hasPermission><shiro:lacksPermission name="${ROLE_KEY}:fillingmachine:edit">false</shiro:lacksPermission>,
         			editicon : 'ace-icon fa fa-pencil blue',
-        			add : <shiro:hasPermission name="${ROLE_KEY}:filling:add">true</shiro:hasPermission><shiro:lacksPermission name="${ROLE_KEY}:filling:add">false</shiro:lacksPermission>,
+        			add : <shiro:hasPermission name="${ROLE_KEY}:fillingmachine:add">true</shiro:hasPermission><shiro:lacksPermission name="${ROLE_KEY}:fillingmachine:add">false</shiro:lacksPermission>,
         			addicon : 'ace-icon fa fa-plus-circle purple',
-        			del : <shiro:hasPermission name="${ROLE_KEY}:filling:delete">true</shiro:hasPermission><shiro:lacksPermission name="${ROLE_KEY}:filling:delete">false</shiro:lacksPermission>,
+        			del : <shiro:hasPermission name="${ROLE_KEY}:fillingmachine:delete">true</shiro:hasPermission><shiro:lacksPermission name="${ROLE_KEY}:fillingmachine:delete">false</shiro:lacksPermission>,
         			delicon : 'ace-icon fa fa-trash-o red',
-        			search : <shiro:hasPermission name="${ROLE_KEY}:filling:search">true</shiro:hasPermission><shiro:lacksPermission name="${ROLE_KEY}:filling:search">false</shiro:lacksPermission>,
+        			search : <shiro:hasPermission name="${ROLE_KEY}:fillingmachine:search">true</shiro:hasPermission><shiro:lacksPermission name="${ROLE_KEY}:fillingmachine:search">false</shiro:lacksPermission>,
         			searchicon : 'ace-icon fa fa-search orange',
         			refresh : true,
         			refreshicon : 'ace-icon fa fa-refresh blue',
-        			view : <shiro:hasPermission name="${ROLE_KEY}:filling:view">true</shiro:hasPermission><shiro:lacksPermission name="${ROLE_KEY}:filling:view">false</shiro:lacksPermission>,
+        			view : <shiro:hasPermission name="${ROLE_KEY}:fillingmachine:view">true</shiro:hasPermission><shiro:lacksPermission name="${ROLE_KEY}:fillingmachine:view">false</shiro:lacksPermission>,
         			viewicon : 'ace-icon fa fa-search-plus grey'
         		}, {
         			// edit record form
