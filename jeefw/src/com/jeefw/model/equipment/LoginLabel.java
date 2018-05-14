@@ -93,6 +93,12 @@ public class LoginLabel extends LoginLabelParameter {
 	 */
 	@Column(name="checkout_bit")
 	private String  checkoutBit;
+	
+	/**
+	 * 读取时间
+	 */
+	@Column(name="read_time")
+	private String readTime;
 
 	public Long getId() {
 		return id;
@@ -182,6 +188,14 @@ public class LoginLabel extends LoginLabelParameter {
 		this.checkoutBit = checkoutBit;
 	}
 
+	public String getReadTime() {
+		return readTime;
+	}
+
+	public void setReadTime(String readTime) {
+		this.readTime = readTime;
+	}
+
 	@Override
 	public int hashCode() {
 		final int prime = 31;
@@ -190,6 +204,7 @@ public class LoginLabel extends LoginLabelParameter {
 		result = prime * result + ((id == null) ? 0 : id.hashCode());
 		result = prime * result + ((is_delete == null) ? 0 : is_delete.hashCode());
 		result = prime * result + ((labelType == null) ? 0 : labelType.hashCode());
+		result = prime * result + ((readTime == null) ? 0 : readTime.hashCode());
 		result = prime * result + ((spare_five == null) ? 0 : spare_five.hashCode());
 		result = prime * result + ((spare_four == null) ? 0 : spare_four.hashCode());
 		result = prime * result + ((spare_one == null) ? 0 : spare_one.hashCode());
@@ -228,6 +243,11 @@ public class LoginLabel extends LoginLabelParameter {
 			if (other.labelType != null)
 				return false;
 		} else if (!labelType.equals(other.labelType))
+			return false;
+		if (readTime == null) {
+			if (other.readTime != null)
+				return false;
+		} else if (!readTime.equals(other.readTime))
 			return false;
 		if (spare_five == null) {
 			if (other.spare_five != null)

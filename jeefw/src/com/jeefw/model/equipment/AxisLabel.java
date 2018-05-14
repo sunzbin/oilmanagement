@@ -132,6 +132,12 @@ public class AxisLabel extends AxisLabelParameter{
 	 */
 	@Column(name="checkout_bit")
 	private String  checkoutBit;
+	
+	/**
+	 * 读取时间
+	 */
+	@Column(name="read_time")
+	private String readTime;
 
 	public Long getId() {
 		return id;
@@ -269,6 +275,14 @@ public class AxisLabel extends AxisLabelParameter{
 		this.checkoutBit = checkoutBit;
 	}
 
+	public String getReadTime() {
+		return readTime;
+	}
+
+	public void setReadTime(String readTime) {
+		this.readTime = readTime;
+	}
+
 	@Override
 	public int hashCode() {
 		final int prime = 31;
@@ -285,6 +299,7 @@ public class AxisLabel extends AxisLabelParameter{
 		result = prime * result + ((labelType == null) ? 0 : labelType.hashCode());
 		result = prime * result + ((pointPosition == null) ? 0 : pointPosition.hashCode());
 		result = prime * result + ((portNumber == null) ? 0 : portNumber.hashCode());
+		result = prime * result + ((readTime == null) ? 0 : readTime.hashCode());
 		result = prime * result + ((shoesCode == null) ? 0 : shoesCode.hashCode());
 		result = prime * result + ((shoesNumber == null) ? 0 : shoesNumber.hashCode());
 		result = prime * result + ((shoesSerialNumber == null) ? 0 : shoesSerialNumber.hashCode());
@@ -361,6 +376,11 @@ public class AxisLabel extends AxisLabelParameter{
 			if (other.portNumber != null)
 				return false;
 		} else if (!portNumber.equals(other.portNumber))
+			return false;
+		if (readTime == null) {
+			if (other.readTime != null)
+				return false;
+		} else if (!readTime.equals(other.readTime))
 			return false;
 		if (shoesCode == null) {
 			if (other.shoesCode != null)
