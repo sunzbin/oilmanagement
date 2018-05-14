@@ -6,7 +6,6 @@
 <link rel="stylesheet" href="${contextPath}/static/assets/css/jquery-ui.css" />
 <link rel="stylesheet" href="${contextPath}/static/assets/css/ui.jqgrid.css" />
 <link rel="stylesheet" href="${contextPath}/static/layui/css/layui.css" />
-<script src="${contextPath}/static/layui/layui.js"></script>
 <div class="row">
 	<div class="col-xs-12">
 		<table id="grid-table"></table>
@@ -23,7 +22,7 @@
 
 <!-- page specific plugin scripts -->
 <script type="text/javascript">
-		var scripts = [ null, "${contextPath}/static/assets/js/jqGrid/jquery.jqGrid.js", "${contextPath}/static/assets/js/jqGrid/i18n/grid.locale-cn.js", null ]
+		var scripts = [ "${contextPath}/static/layui/layui.all.js", "${contextPath}/static/assets/js/jqGrid/jquery.jqGrid.js", "${contextPath}/static/assets/js/jqGrid/i18n/grid.locale-cn.js", null ]
         $('.page-content-area').ace_ajax('loadScripts', scripts, function() {
         	// inline scripts related to this page
         	jQuery(function($) {
@@ -50,7 +49,7 @@
         			url : "${contextPath}/labelLogin/getLoginLabelInfo",
         			datatype : "json",
         			height : 450,
-        			colNames : ['', 'ID', '标签类型', '用户id', '是否删除', '保留位一','保留位二','保留位三','保留位四','保留位五','保留位六','校验位'],
+        			colNames : ['', 'ID', '标签类型', '用户id'],
         			colModel : [ {
         				name : '',
         				index : '',
@@ -89,78 +88,6 @@
         				index : 'userId',
         				label : '用户id',
         				width : 160,
-        				editable : true,
-        				editoptions : {size : "20", maxlength : "40"},
-        				searchoptions : {sopt : ['cn']},
-        				editrules : {required : true}
-        			}, {
-        				name : 'is_delete',
-        				index : 'is_delete',
-        				label : '是否删除',
-        				width : 100,
-        				editable : true,
-        				editoptions : {size : "20", maxlength : "40"},
-        				searchoptions : {sopt : ['cn']},
-        				editrules : {required : true}
-        			}, {
-        				name : 'spare_one',
-        				index : 'spare_one',
-        				label : '保留位一',
-        				width : 110,
-        				editable : true,
-        				editoptions : {size : "20", maxlength : "40"},
-        				searchoptions : {sopt : ['cn']},
-        				editrules : {required : true}
-        			}, {
-        				name : 'pointPosition',
-        				index : 'pointPosition',
-        				label : '保留位二',
-        				width : 100,
-        				editable : true,
-        				editoptions : {size : "20", maxlength : "40"},
-        				searchoptions : {sopt : ['cn']},
-        				editrules : {required : true}
-        			},  {
-        				name : 'pointPosition',
-        				index : 'pointPosition',
-        				label : '保留位三',
-        				width : 100,
-        				editable : true,
-        				editoptions : {size : "20", maxlength : "40"},
-        				searchoptions : {sopt : ['cn']},
-        				editrules : {required : true}
-        			},{
-        				name : 'pointPosition',
-        				index : 'pointPosition',
-        				label : '保留位四',
-        				width : 100,
-        				editable : true,
-        				editoptions : {size : "20", maxlength : "40"},
-        				searchoptions : {sopt : ['cn']},
-        				editrules : {required : true}
-        			},{
-        				name : 'pointPosition',
-        				index : 'pointPosition',
-        				label : '保留位五',
-        				width : 100,
-        				editable : true,
-        				editoptions : {size : "20", maxlength : "40"},
-        				searchoptions : {sopt : ['cn']},
-        				editrules : {required : true}
-        			},{
-        				name : 'pointPosition',
-        				index : 'pointPosition',
-        				label : '保留位六',
-        				width : 100,
-        				editable : true,
-        				editoptions : {size : "20", maxlength : "40"},
-        				searchoptions : {sopt : ['cn']},
-        				editrules : {required : true}
-        			},{
-        				name : 'checkoutBit',
-        				index : 'checkoutBit',
-        				label : '校验位',
-        				width : 100,
         				editable : true,
         				editoptions : {size : "20", maxlength : "40"},
         				searchoptions : {sopt : ['cn']},
@@ -298,11 +225,22 @@
                 caption: "上传",
                 title:"上传",
                 buttonicon: "ace-icon fa fa-globe blue",
-                onClickButton: function () {
-                	window.location.href='${contextPath}/labelLogin/read';
-                },
-                position: "last"
+                onClickButton: null,
+                position: "last",
+                id:"upload"
             })
+            
+            $('#upload').click(function(){
+            	layer.open({
+                    type: 2,
+                    shadeClose: false, //点击遮罩关闭层
+                    area: ['690px', '640px'],
+                    content: '${contextPath}/labelLogin/read',
+                    end: function () {
+                        location.reload(); //点击后刷新父页面
+                    }
+                });
+            }); 
         		
         		// add custom button to export the data to excel
         		if(<shiro:hasPermission name="${ROLE_KEY}:dict:export">true</shiro:hasPermission><shiro:lacksPermission name="${ROLE_KEY}:dict:export">false</shiro:lacksPermission>){

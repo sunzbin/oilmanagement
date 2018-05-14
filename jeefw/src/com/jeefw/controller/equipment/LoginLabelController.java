@@ -28,7 +28,10 @@ import com.jeefw.core.Constant;
 import com.jeefw.core.JavaEEFrameworkBaseController;
 import com.jeefw.model.equipment.AxisLabel;
 import com.jeefw.model.equipment.LoginLabel;
+import com.jeefw.model.sys.Dict;
+import com.jeefw.service.equipment.AscIIService;
 import com.jeefw.service.equipment.LoginLabelService;
+import com.jeefw.service.sys.DictService;
 
 import core.support.ExtJSBaseParameter;
 import core.support.JqGridPageView;
@@ -52,6 +55,12 @@ public class LoginLabelController extends JavaEEFrameworkBaseController<LoginLab
 
 	@Resource
 	private LoginLabelService loginLabelService;
+	
+	@Resource
+	private DictService dictService;
+	
+	@Resource
+	private AscIIService ascIIService;
 
 	// 查询字典的表格，包括分页、搜索和排序
 		@RequestMapping(value = "/getLoginLabelInfo", method = { RequestMethod.POST, RequestMethod.GET })
@@ -86,6 +95,23 @@ public class LoginLabelController extends JavaEEFrameworkBaseController<LoginLab
 			sortedCondition.put(sortedObject, sortedValue);
 			loginLabel.setSortedConditions(sortedCondition);
 			QueryResult<LoginLabel> queryResult = loginLabelService.doPaginationQuery(loginLabel);
+			List<LoginLabel> resultList =  queryResult.getResultList();
+			for (int i = 0; i < resultList.size(); i++) {
+				String[] findLabelTypeKey = new String [2];
+				findLabelTypeKey[0] = "dictKey";
+				findLabelTypeKey[1] = "parentDictkey";
+				String[] findLabelTypeValue = new String [2];
+				findLabelTypeValue[0] = resultList.get(i).getLabelType();
+				findLabelTypeValue[1] = "LABEL_TYPE";
+				Dict labelType = dictService.getByProerties(findLabelTypeKey,findLabelTypeValue);
+				resultList.get(i).setLabelType(labelType.getDictValue());//设置标签类型
+				String userId = ascIIService.getByProerties("hex", resultList.get(i).getUserId().split(",")[0]).getCharacters()+
+						ascIIService.getByProerties("hex", resultList.get(i).getUserId().split(",")[1]).getCharacters()+
+						ascIIService.getByProerties("hex", resultList.get(i).getUserId().split(",")[2]).getCharacters()+
+						ascIIService.getByProerties("hex", resultList.get(i).getUserId().split(",")[3]).getCharacters();
+				resultList.get(i).setUserId(userId);
+				
+			}
 			JqGridPageView<LoginLabel> dictListView = new JqGridPageView<LoginLabel>();
 			dictListView.setMaxResults(maxResults);
 			dictListView.setRows(queryResult.getResultList());

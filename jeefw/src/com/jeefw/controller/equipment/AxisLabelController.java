@@ -28,7 +28,9 @@ import com.jeefw.core.Constant;
 import com.jeefw.core.JavaEEFrameworkBaseController;
 import com.jeefw.model.equipment.AxisLabel;
 import com.jeefw.model.sys.Dict;
+import com.jeefw.service.equipment.AscIIService;
 import com.jeefw.service.equipment.AxisLabelService;
+import com.jeefw.service.sys.DictService;
 
 import core.support.ExtJSBaseParameter;
 import core.support.JqGridPageView;
@@ -51,6 +53,12 @@ public class AxisLabelController extends JavaEEFrameworkBaseController<AxisLabel
 	
 	@Resource
 	private AxisLabelService axisLabelService;
+	
+	@Resource
+	private DictService dictService;
+	
+	@Resource
+	private AscIIService ascIIService;
 
 	// 查询字典的表格，包括分页、搜索和排序
 		@RequestMapping(value = "/getAxisInfo", method = { RequestMethod.POST, RequestMethod.GET })
@@ -85,6 +93,54 @@ public class AxisLabelController extends JavaEEFrameworkBaseController<AxisLabel
 			sortedCondition.put(sortedObject, sortedValue);
 			axisLabel.setSortedConditions(sortedCondition);
 			QueryResult<AxisLabel> queryResult = axisLabelService.doPaginationQuery(axisLabel);
+			List<AxisLabel> resultList =  queryResult.getResultList();
+			for (int i = 0; i < resultList.size(); i++) {
+				String[] findLabelTypeKey = new String [2];
+				findLabelTypeKey[0] = "dictKey";
+				findLabelTypeKey[1] = "parentDictkey";
+				String[] findLabelTypeValue = new String [2];
+				findLabelTypeValue[0] = resultList.get(i).getLabelType();
+				findLabelTypeValue[1] = "LABEL_TYPE";
+				Dict labelType = dictService.getByProerties(findLabelTypeKey,findLabelTypeValue);
+				resultList.get(i).setLabelType(labelType.getDictValue());//设置标签类型
+				
+				String[] findCarCodeKey = new String [2];
+				findCarCodeKey[0] = "dictKey";
+				findCarCodeKey[1] = "parentDictkey";
+				String[] findCarCodeValue = new String [2];
+				findCarCodeValue[0] = resultList.get(i).getCarCode();
+				findCarCodeValue[1] = "CAR_CODE";
+				Dict carCode = dictService.getByProerties(findCarCodeKey,findCarCodeValue);
+				resultList.get(i).setCarCode(carCode.getDictValue());//设置车型代码
+				
+				String carNumber = 
+						ascIIService.getByProerties("hex", resultList.get(i).getCarNumber().split(",")[0]).getCharacters()+
+						ascIIService.getByProerties("hex", resultList.get(i).getCarNumber().split(",")[1]).getCharacters()+
+						ascIIService.getByProerties("hex", resultList.get(i).getCarNumber().split(",")[2]).getCharacters()+
+						ascIIService.getByProerties("hex", resultList.get(i).getCarNumber().split(",")[3]).getCharacters();
+				resultList.get(i).setCarNumber(carNumber);
+				
+				String[] findAxialPositionKey = new String [2];
+				findAxialPositionKey[0] = "dictKey";
+				findAxialPositionKey[1] = "parentDictkey";
+				String[] findAxialPositionValue = new String [2];
+				findAxialPositionValue[0] = resultList.get(i).getAxialPosition();
+				findAxialPositionValue[1] = "AXIAL_POSITION";
+				Dict axialPosition = dictService.getByProerties(findAxialPositionKey,findAxialPositionValue);
+				resultList.get(i).setAxialPosition(axialPosition.getDictValue());//设置加注轴位
+				
+				String[] findPointPositionKey = new String [2];
+				findPointPositionKey[0] = "dictKey";
+				findPointPositionKey[1] = "parentDictkey";
+				String[] findPointPositionValue = new String [2];
+				findPointPositionValue[0] = "point_position:"+resultList.get(i).getPointPosition();
+				findPointPositionValue[1] = "POINT_POSITION";
+				Dict pointPosition = dictService.getByProerties(findPointPositionKey,findPointPositionValue);
+				resultList.get(i).setPointPosition(pointPosition.getDictValue());//设置加注点位
+				
+				resultList.get(i).setGreaseTypeCode("无");//设置油脂类型
+				
+			}
 			JqGridPageView<AxisLabel> dictListView = new JqGridPageView<AxisLabel>();
 			dictListView.setMaxResults(maxResults);
 			dictListView.setRows(queryResult.getResultList());
