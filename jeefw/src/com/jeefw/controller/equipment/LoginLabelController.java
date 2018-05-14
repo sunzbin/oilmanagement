@@ -3,6 +3,8 @@ package com.jeefw.controller.equipment;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.OutputStream;
+import java.net.URLDecoder;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -13,6 +15,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
+import org.apache.commons.beanutils.ConvertUtils;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -27,6 +30,7 @@ import com.jeefw.model.equipment.AxisLabel;
 import com.jeefw.model.equipment.LoginLabel;
 import com.jeefw.service.equipment.LoginLabelService;
 
+import core.support.ExtJSBaseParameter;
 import core.support.JqGridPageView;
 import core.support.QueryResult;
 import core.util.FileUpload;
@@ -96,7 +100,7 @@ public class LoginLabelController extends JavaEEFrameworkBaseController<LoginLab
 		 */  
 		@RequestMapping(value="/read")  
 		public String addExcel(){
-		    return "/back/label/upload";  
+		    return "/back/label/upload2";  
 		}  
 		
 		/**  
@@ -114,25 +118,27 @@ public class LoginLabelController extends JavaEEFrameworkBaseController<LoginLab
 				List<LoginLabel> loginLabels = new LinkedList<>();
 				String filePath = PathUtil.getClasspath() + "uploadFiles/file/";	//文件上传路径
 				String fileName =  FileUpload.fileUp(file, filePath, "userexcel");//执行上传
-				List<Map> list = null;
+				List<Map<String,String>> list = null;
 				if(ObjectExcelRead.isExcel2003(new FileInputStream(new File(filePath+fileName)))) {
-					list = (List)ObjectExcelRead.readExcel2003(filePath, fileName, 0, 0, 0);
+					list = (List<Map<String,String>>)ObjectExcelRead.readExcel2003(filePath, fileName, 1, 0, 0);
 				}else if(ObjectExcelRead.isExcel2007(new FileInputStream(new File(filePath+fileName)))) {
-					list = (List)ObjectExcelRead.readExcel2007(filePath, fileName, 0, 0, 0);
+					list = (List<Map<String,String>>)ObjectExcelRead.readExcel2007(filePath, fileName, 1, 0, 0);
 				}
 				if(list.size()>0) {
 					for (int i = 0; i < list.size(); i++) {
+						String[] labelContent = list.get(i).get("var1").split(" ");
 						LoginLabel loginLabel = new LoginLabel();
-						loginLabel.setLabelType((String)list.get(i).get("var0"));
-						loginLabel.setUserId((String)list.get(i).get("var1"));
+						loginLabel.setLabelType(labelContent[1]);
+						loginLabel.setUserId(labelContent[2]+","+labelContent[3]+","+labelContent[4]+","+labelContent[5]);
 						loginLabel.setIs_delete("1");
-						loginLabel.setSpare_one((String)list.get(i).get("var2"));
-						loginLabel.setSpare_two((String)list.get(i).get("var3"));
-						loginLabel.setSpare_three((String)list.get(i).get("var4"));
-						loginLabel.setSpare_four((String)list.get(i).get("var5"));
-						loginLabel.setSpare_five((String)list.get(i).get("var6"));
-						loginLabel.setSpare_six((String)list.get(i).get("var7"));
-						loginLabel.setCheckoutBit((String)list.get(i).get("var8"));
+						loginLabel.setSpare_one(labelContent[6]);
+						loginLabel.setSpare_two(labelContent[7]);
+						loginLabel.setSpare_three(labelContent[8]);
+						loginLabel.setSpare_four(labelContent[9]);
+						loginLabel.setSpare_five(labelContent[10]);
+						loginLabel.setSpare_six(labelContent[11]);
+						loginLabel.setCheckoutBit(labelContent[12]);
+						loginLabel.setReadTime(list.get(i).get("var2"));
 						loginLabels.add(loginLabel);
 					}
 					if(loginLabels.size()>0) {
@@ -140,7 +146,69 @@ public class LoginLabelController extends JavaEEFrameworkBaseController<LoginLab
 					}
 				}
 			}
+			mv.setViewName("/back/label/login");
 			return mv;
 		}
+		
+		// 操作字典的删除、导出Excel、字段判断和保存
+				@RequestMapping(value = "/operateLabelLogin", method = { RequestMethod.POST, RequestMethod.GET })
+				public void operateDict(HttpServletRequest request, HttpServletResponse response) throws Exception {
+					String oper = request.getParameter("oper");
+					String id = request.getParameter("id");
+					if (oper.equals("del")) {
+						String[] ids = id.split(",");
+						deleteLabelLogin(request, response, (Long[]) ConvertUtils.convert(ids, Long.class));
+					} else if (oper.equals("excel")) {
+						response.setContentType("application/msexcel;charset=UTF-8");
+						try {
+							response.addHeader("Content-Disposition", "attachment;filename=file.xls");
+							OutputStream out = response.getOutputStream();
+							out.write(URLDecoder.decode(request.getParameter("csvBuffer"), "UTF-8").getBytes());
+							out.flush();
+							out.close();
+						} catch (Exception e) {
+							e.printStackTrace();
+						}
+					} else {
+						Map<String, Object> result = new HashMap<String, Object>();
+						LoginLabel axisLabel = null;
+						if (oper.equals("edit")) {
+							axisLabel = loginLabelService.get(Long.valueOf(id));
+						}
+						LoginLabel entity = new LoginLabel(); 
+						if (oper.equals("edit")) {
+							entity.setId(Long.valueOf(id));
+							entity.setCmd("edit");
+							doSave(entity, request, response);
+						} else if (oper.equals("add")) {
+							entity.setCmd("new");
+							doSave(entity, request, response);
+						}
+					}
+				}
+				
+				// 保存标签的实体Bean
+				@RequestMapping(value = "/saveLabelLogin", method = { RequestMethod.POST, RequestMethod.GET })
+				public void doSave(LoginLabel entity, HttpServletRequest request, HttpServletResponse response) throws IOException {
+					ExtJSBaseParameter parameter = ((ExtJSBaseParameter) entity);
+					if (CMD_EDIT.equals(parameter.getCmd())) {
+						loginLabelService.merge(entity);
+					} else if (CMD_NEW.equals(parameter.getCmd())) {
+						loginLabelService.persist(entity);
+					}
+					parameter.setSuccess(true);
+					writeJSON(response, parameter);
+				}
+				
+				// 删除字典
+				@RequestMapping("/deleteLabelAxis")
+				public void deleteLabelLogin(HttpServletRequest request, HttpServletResponse response, @RequestParam("ids") Long[] ids) throws IOException {
+					boolean flag = loginLabelService.deleteByPK(ids);
+					if (flag) {
+						writeJSON(response, "{success:true}");
+					} else {
+						writeJSON(response, "{success:false}");
+					}
+				}
 		
 }

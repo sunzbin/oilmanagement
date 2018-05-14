@@ -3,6 +3,8 @@ package com.jeefw.controller.equipment;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.OutputStream;
+import java.net.URLDecoder;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -13,6 +15,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
+import org.apache.commons.beanutils.ConvertUtils;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -24,8 +27,10 @@ import org.springframework.web.servlet.ModelAndView;
 import com.jeefw.core.Constant;
 import com.jeefw.core.JavaEEFrameworkBaseController;
 import com.jeefw.model.equipment.AxisLabel;
+import com.jeefw.model.sys.Dict;
 import com.jeefw.service.equipment.AxisLabelService;
 
+import core.support.ExtJSBaseParameter;
 import core.support.JqGridPageView;
 import core.support.QueryResult;
 import core.util.FileUpload;
@@ -114,22 +119,24 @@ public class AxisLabelController extends JavaEEFrameworkBaseController<AxisLabel
 				String fileName =  FileUpload.fileUp(file, filePath, "userexcel");//执行上传
 				List<Map<String,String>> list = null;
 				if(ObjectExcelRead.isExcel2003(new FileInputStream(new File(filePath+fileName)))) {
-					list = (List<Map<String,String>>)ObjectExcelRead.readExcel2003(filePath, fileName, 0, 0, 0);
+					list = (List<Map<String,String>>)ObjectExcelRead.readExcel2003(filePath, fileName, 1, 0, 0);
 				}else if(ObjectExcelRead.isExcel2007(new FileInputStream(new File(filePath+fileName)))) {
-					list = (List<Map<String,String>>)ObjectExcelRead.readExcel2007(filePath, fileName, 0, 0, 0);
+					list = (List<Map<String,String>>)ObjectExcelRead.readExcel2007(filePath, fileName, 1, 0, 0);
 				}
 				if(list.size()>0) {
 					for (int i = 0; i < list.size(); i++) {
+						String[] labelContent = list.get(i).get("var1").split(" ");
 						AxisLabel axisLabel = new AxisLabel();
-						axisLabel.setLabelType((String)list.get(i).get("var0"));
-						axisLabel.setCarCode((String)list.get(i).get("var1"));
-						axisLabel.setCarNumber((String)list.get(i).get("var2"));
-						axisLabel.setAxialPosition((String)list.get(i).get("var3"));
-						axisLabel.setPointPosition((String)list.get(i).get("var4"));
-						axisLabel.setGreaseTypeCode((String)list.get(i).get("var5"));
-						axisLabel.setSpare_one((String)list.get(i).get("var6"));
-						axisLabel.setSpare_two((String)list.get(i).get("var7"));
-						axisLabel.setCheckoutBit((String)list.get(i).get("var8"));
+						axisLabel.setLabelType(labelContent[1]);
+						axisLabel.setCarCode(labelContent[2]);
+						axisLabel.setCarNumber(labelContent[3]+","+labelContent[4]+","+labelContent[5]+","+labelContent[6]);
+						axisLabel.setAxialPosition(labelContent[7]);
+						axisLabel.setPointPosition(labelContent[8]);
+						axisLabel.setGreaseTypeCode(labelContent[9]);
+						axisLabel.setSpare_one(labelContent[10]);
+						axisLabel.setSpare_two(labelContent[11]);
+						axisLabel.setCheckoutBit(labelContent[12]);
+						axisLabel.setReadTime(list.get(i).get("var2"));
 						axisLabels.add(axisLabel);
 					}
 					if(axisLabels.size()>0) {
@@ -139,5 +146,66 @@ public class AxisLabelController extends JavaEEFrameworkBaseController<AxisLabel
 			}
 			mv.setViewName("/back/label/axis");
 			return mv;
+		}
+		
+		// 操作字典的删除、导出Excel、字段判断和保存
+		@RequestMapping(value = "/operateLabelAxis", method = { RequestMethod.POST, RequestMethod.GET })
+		public void operateDict(HttpServletRequest request, HttpServletResponse response) throws Exception {
+			String oper = request.getParameter("oper");
+			String id = request.getParameter("id");
+			if (oper.equals("del")) {
+				String[] ids = id.split(",");
+				deleteLabelAxis(request, response, (Long[]) ConvertUtils.convert(ids, Long.class));
+			} else if (oper.equals("excel")) {
+				response.setContentType("application/msexcel;charset=UTF-8");
+				try {
+					response.addHeader("Content-Disposition", "attachment;filename=file.xls");
+					OutputStream out = response.getOutputStream();
+					out.write(URLDecoder.decode(request.getParameter("csvBuffer"), "UTF-8").getBytes());
+					out.flush();
+					out.close();
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+			} else {
+				Map<String, Object> result = new HashMap<String, Object>();
+				AxisLabel axisLabel = null;
+				if (oper.equals("edit")) {
+					axisLabel = axisLabelService.get(Long.valueOf(id));
+				}
+				AxisLabel entity = new AxisLabel();
+				if (oper.equals("edit")) {
+					entity.setId(Long.valueOf(id));
+					entity.setCmd("edit");
+					doSave(entity, request, response);
+				} else if (oper.equals("add")) {
+					entity.setCmd("new");
+					doSave(entity, request, response);
+				}
+			}
+		}
+		
+		// 保存标签的实体Bean
+		@RequestMapping(value = "/saveLabelAxis", method = { RequestMethod.POST, RequestMethod.GET })
+		public void doSave(AxisLabel entity, HttpServletRequest request, HttpServletResponse response) throws IOException {
+			ExtJSBaseParameter parameter = ((ExtJSBaseParameter) entity);
+			if (CMD_EDIT.equals(parameter.getCmd())) {
+				axisLabelService.merge(entity);
+			} else if (CMD_NEW.equals(parameter.getCmd())) {
+				axisLabelService.persist(entity);
+			}
+			parameter.setSuccess(true);
+			writeJSON(response, parameter);
+		}
+		
+		// 删除字典
+		@RequestMapping("/deleteLabelAxis")
+		public void deleteLabelAxis(HttpServletRequest request, HttpServletResponse response, @RequestParam("ids") Long[] ids) throws IOException {
+			boolean flag = axisLabelService.deleteByPK(ids);
+			if (flag) {
+				writeJSON(response, "{success:true}");
+			} else {
+				writeJSON(response, "{success:false}");
+			}
 		}
 }
