@@ -20,9 +20,11 @@ import org.springframework.web.bind.annotation.RequestParam;
 
 import com.jeefw.core.Constant;
 import com.jeefw.core.JavaEEFrameworkBaseController;
+import com.jeefw.model.equipment.AscII;
 import com.jeefw.model.equipment.FillingMachine;
 import com.jeefw.service.equipment.FillingMachineService;
 
+import core.support.ExtJSBaseParameter;
 import core.support.JqGridPageView;
 import core.support.QueryResult;
 import net.sf.json.JSONArray;
@@ -101,7 +103,27 @@ public class FillingMachineController extends JavaEEFrameworkBaseController<Fill
 				e.printStackTrace();
 			}
 		} else {
-			
+			Map<String, Object> result = new HashMap<String, Object>();
+			FillingMachine dict = null;
+			if (oper.equals("edit")) {
+				dict = fillingMachineService.get(Long.valueOf(id));
+			}
+			FillingMachine entity = new FillingMachine();
+			entity.setAffiliatedInstitutions(request.getParameter("affiliatedInstitutions"));
+			entity.setProductModel(request.getParameter("productModel"));
+			entity.setProductCoding(request.getParameter("productCoding"));
+			entity.setEquipmentNumber(request.getParameter("equipmentNumber"));
+			entity.setElectricQuantity(request.getParameter("electricQuantity"));
+			entity.setRunningState(request.getParameter("runningState"));
+			entity.setEquipmentState(request.getParameter("equipmentState"));
+			if (oper.equals("edit")) {
+				entity.setId(Long.valueOf(id));
+				entity.setCmd("edit");
+				doSave(entity, request, response);
+			} else if (oper.equals("add")) {
+				entity.setCmd("new");
+				doSave(entity, request, response);
+			}
 		}
 	}
 	
@@ -116,7 +138,17 @@ public class FillingMachineController extends JavaEEFrameworkBaseController<Fill
 		}
 	}
 
-
+	@RequestMapping(value = "/saveFillingMachine", method = { RequestMethod.POST, RequestMethod.GET })
+	public void doSave(FillingMachine entity, HttpServletRequest request, HttpServletResponse response) throws IOException {
+		ExtJSBaseParameter parameter = ((ExtJSBaseParameter) entity);
+		if (CMD_EDIT.equals(parameter.getCmd())) {
+			fillingMachineService.merge(entity);
+		} else if (CMD_NEW.equals(parameter.getCmd())) {
+			fillingMachineService.persist(entity);
+		}
+		parameter.setSuccess(true);
+		writeJSON(response, parameter);
+	}
 
 
 
