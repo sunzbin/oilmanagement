@@ -44,7 +44,7 @@ public class FillingMachine extends FillingMachineParameter{
 	 * 所属机构
 	 */
 	@Column(name = "affiliated_institutions")
-	private Long  affiliatedInstitutions ;
+	private String  affiliatedInstitutions ;
 	
 	/**
 	 * 产品型号
@@ -82,10 +82,6 @@ public class FillingMachine extends FillingMachineParameter{
 	@Column(name = "equipment_state", length = 20)
 	private String  equipmentState;
 
-
-	public FillingMachine() {
-	}
-
 	public Long getId() {
 		return id;
 	}
@@ -94,11 +90,11 @@ public class FillingMachine extends FillingMachineParameter{
 		this.id = id;
 	}
 
-	public Long getAffiliatedInstitutions() {
+	public String getAffiliatedInstitutions() {
 		return affiliatedInstitutions;
 	}
 
-	public void setAffiliatedInstitutions(Long affiliatedInstitutions) {
+	public void setAffiliatedInstitutions(String affiliatedInstitutions) {
 		this.affiliatedInstitutions = affiliatedInstitutions;
 	}
 
@@ -216,8 +212,12 @@ public class FillingMachine extends FillingMachineParameter{
 			return false;
 		return true;
 	}
-	
-	
-	
+
+	/**
+	 * 
+	 */
+	public FillingMachine() {
+		super();
+	}
 	
 }
