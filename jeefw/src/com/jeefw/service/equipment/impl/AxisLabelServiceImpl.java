@@ -1,5 +1,7 @@
 package com.jeefw.service.equipment.impl;
 
+import java.util.List;
+
 import javax.annotation.Resource;
 
 import org.springframework.stereotype.Service;
@@ -28,7 +30,14 @@ private AxisLabelDao axisLabelDao;
 		this.dao = axisLabelDao;
 	}
 
+	@Override
+	public void batchSaveAxisLabel(List<AxisLabel> axisLabels) {
+		axisLabelDao.batchSaveAxisLabel(axisLabels);
+	}
 
+	
+
+	
 
 
 

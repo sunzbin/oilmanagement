@@ -633,5 +633,10 @@ public class SysUserController extends JavaEEFrameworkBaseController<SysUser> im
 	public String labelLogin(HttpServletRequest request, HttpServletResponse response) throws IOException {
 		return "/back/label/login";
 	}
+	
+	@RequestMapping("/ascii")
+	public String ascii(HttpServletRequest request, HttpServletResponse response) throws IOException {
+		return "/back/ascii/ascii";
+	}
 
 }

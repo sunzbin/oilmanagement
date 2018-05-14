@@ -1,5 +1,7 @@
 package com.jeefw.service.equipment.impl;
 
+import java.util.List;
+
 import javax.annotation.Resource;
 
 import org.springframework.stereotype.Service;
@@ -26,6 +28,12 @@ public class LoginLabelServiceImpl extends BaseService<LoginLabel> implements Lo
 	public void setDictDao(LoginLabelDao loginLabelDao) {
 		this.loginLabelDao = loginLabelDao;
 		this.dao = loginLabelDao;
+	}
+
+	@Override
+	public void batchSaveAxisLabel(List<LoginLabel> loginLabels) {
+		loginLabelDao.batchSaveAxisLabel(loginLabels);
+		
 	}
 
 }
