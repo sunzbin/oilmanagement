@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.net.URLDecoder;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import javax.annotation.Resource;
@@ -17,12 +18,16 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
 
+import com.google.gson.Gson;
 import com.jeefw.core.Constant;
 import com.jeefw.core.JavaEEFrameworkBaseController;
 import com.jeefw.model.equipment.AscII;
 import com.jeefw.model.equipment.FillingMachine;
+import com.jeefw.model.sys.Department;
 import com.jeefw.service.equipment.FillingMachineService;
+import com.jeefw.service.sys.DepartmentService;
 
 import core.support.ExtJSBaseParameter;
 import core.support.JqGridPageView;
@@ -42,6 +47,9 @@ public class FillingMachineController extends JavaEEFrameworkBaseController<Fill
 
 	@Resource
 	private FillingMachineService fillingMachineService;
+	
+	@Resource
+	private DepartmentService departmentService;
 
 	// 查询字典的表格，包括分页、搜索和排序
 	@RequestMapping(value = "/getMachineInfo", method = { RequestMethod.POST, RequestMethod.GET })
@@ -87,6 +95,8 @@ public class FillingMachineController extends JavaEEFrameworkBaseController<Fill
 			}else {
 				queryResult.getResultList().get(i).setEquipmentState("停用");
 			}
+			Department department = departmentService.get(Long.valueOf(queryResult.getResultList().get(i).getAffiliatedInstitutions()));
+			queryResult.getResultList().get(i).setAffiliatedInstitutions(department.getDepartmentValue());
 		}
 		JqGridPageView<FillingMachine> dictListView = new JqGridPageView<FillingMachine>();
 		dictListView.setMaxResults(maxResults);
@@ -162,8 +172,11 @@ public class FillingMachineController extends JavaEEFrameworkBaseController<Fill
 		writeJSON(response, parameter);
 	}
 
-
-
-
+	@RequestMapping(value = "/findDepartment", produces = "application/json; charset=UTF-8")
+	@ResponseBody
+	public Object findDepartment() throws IOException {
+		List<Department> departments = departmentService.doQueryAll();
+		return new Gson().toJson(departments);
+	}
 
 }
