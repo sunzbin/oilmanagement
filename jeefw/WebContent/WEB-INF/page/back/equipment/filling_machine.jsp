@@ -80,7 +80,8 @@
         				label : '所属机构',
         				width : 120,
         				editable : true,
-        				editoptions : {size : "20", maxlength : "20"},
+        				edittype : 'select',
+        				editoptions : {value:getAffiliatedInstitutions()},
         				searchoptions : {sopt : ['eq']},
         				editrules : {required : true}
         			}, {
@@ -126,7 +127,7 @@
         				width : 100,
         				editable : true,
         				edittype : 'select',
-        				editoptions : {value:'0:请选择;1:运行;2:停止'},
+        				editoptions : {value:'1:运行;2:停止'},
         				searchoptions : {sopt : ['cn']},
         				editrules : {required : true}
         			},{
@@ -136,7 +137,7 @@
         				width : 100,
         				editable : true,
         				edittype : 'select',
-        				editoptions : {value:'0:请选择;1:启用;2:停用'},
+        				editoptions : {value:'1:启用;2:停用'},
         				searchoptions : {sopt : ['cn']},
         				editrules : {required : true}
         			}],
@@ -185,6 +186,30 @@
         			setTimeout(function() {
         				$(cell).find('input[type=checkbox]').addClass('ace ace-switch ace-switch-5').after('<span class="lbl"></span>');
         			}, 0);
+        		}
+        		
+        		function getAffiliatedInstitutions(){
+        			var affiliatedInstitutions = '';
+        			$.ajax({
+        				type:"post",
+        				async:false,
+        				url:"${contextPath}/filling/findDepartment",
+        				success:function(data){  
+        					console.info(data);
+        				if (data != null) {  
+        					//debugger;
+        					for(var i=0;i<data.length;i++){
+        						if(i!=data.length-1){  
+        							affiliatedInstitutions += data[i].id+':'+data[i].departmentValue+';';
+        						}else{
+        							affiliatedInstitutions += data[i].id+':'+data[i].departmentValue;
+        						}
+        						
+        					}
+       				     }  
+        				}  
+      				}); 
+					return affiliatedInstitutions;        			
         		}
         		
         		// navButtons
