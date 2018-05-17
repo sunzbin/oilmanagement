@@ -125,7 +125,8 @@
         				label : '运行状态',
         				width : 100,
         				editable : true,
-        				editoptions : {size : "20", maxlength : "40"},
+        				edittype : 'select',
+        				editoptions : {value:'0:请选择;1:运行;2:停止'},
         				searchoptions : {sopt : ['cn']},
         				editrules : {required : true}
         			},{
@@ -134,7 +135,8 @@
         				label : '设备状态',
         				width : 100,
         				editable : true,
-        				editoptions : {size : "20", maxlength : "40"},
+        				edittype : 'select',
+        				editoptions : {value:'0:请选择;1:启用;2:停用'},
         				searchoptions : {sopt : ['cn']},
         				editrules : {required : true}
         			}],
