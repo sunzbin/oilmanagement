@@ -76,6 +76,18 @@ public class FillingMachineController extends JavaEEFrameworkBaseController<Fill
 		sortedCondition.put(sortedObject, sortedValue);
 		fillingMachine.setSortedConditions(sortedCondition);
 		QueryResult<FillingMachine> queryResult = fillingMachineService.doPaginationQuery(fillingMachine);
+		for (int i = 0; i < queryResult.getResultList().size(); i++) {
+			if(queryResult.getResultList().get(i).getRunningState().equals("1")) {
+				queryResult.getResultList().get(i).setRunningState("运行");
+			}else {
+				queryResult.getResultList().get(i).setRunningState("停止");
+			}
+			if(queryResult.getResultList().get(i).getEquipmentState().equals("1")) {
+				queryResult.getResultList().get(i).setEquipmentState("启用");
+			}else {
+				queryResult.getResultList().get(i).setEquipmentState("停用");
+			}
+		}
 		JqGridPageView<FillingMachine> dictListView = new JqGridPageView<FillingMachine>();
 		dictListView.setMaxResults(maxResults);
 		dictListView.setRows(queryResult.getResultList());
