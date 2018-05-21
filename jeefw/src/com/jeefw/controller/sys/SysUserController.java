@@ -58,7 +58,7 @@ import core.util.JavaEEFrameworkUtils;
 
 /**
  * 用户的控制层
- * @框架唯一的升级和技术支持地址：http://shop111863449.taobao.com
+ * 
  */
 @Controller
 @RequestMapping("/sys/sysuser")

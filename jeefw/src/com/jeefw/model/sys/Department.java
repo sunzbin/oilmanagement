@@ -37,6 +37,8 @@ public class Department extends DepartmentParameter {
 	private String parentDepartmentkey;
 	@Column(name = "description", length = 200)
 	private String description;
+	@Column(name = "level", length = 20)
+	private String level;
 
 	public Department() {
 
@@ -82,6 +84,14 @@ public class Department extends DepartmentParameter {
 		this.description = description;
 	}
 
+	public String getLevel() {
+		return level;
+	}
+
+	public void setLevel(String level) {
+		this.level = level;
+	}
+
 	public boolean equals(Object obj) {
 		if (obj == null)
 			return false;
@@ -89,7 +99,7 @@ public class Department extends DepartmentParameter {
 			return false;
 		final Department other = (Department) obj;
 		return Objects.equal(this.id, other.id) && Objects.equal(this.departmentKey, other.departmentKey) && Objects.equal(this.departmentValue, other.departmentValue)
-				&& Objects.equal(this.parentDepartmentkey, other.parentDepartmentkey) && Objects.equal(this.description, other.description);
+				&& Objects.equal(this.parentDepartmentkey, other.parentDepartmentkey) && Objects.equal(this.description, other.description)  && Objects.equal(this.level, other.level);
 	}
 
 	public int hashCode() {
