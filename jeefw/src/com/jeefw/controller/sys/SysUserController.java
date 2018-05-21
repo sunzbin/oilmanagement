@@ -618,5 +618,25 @@ public class SysUserController extends JavaEEFrameworkBaseController<SysUser> im
 	public String druid(HttpServletRequest request, HttpServletResponse response) throws IOException {
 		return "back/druid";
 	}
+	
+	@RequestMapping("/filling")
+	public String fillingMachine(HttpServletRequest request, HttpServletResponse response) throws IOException {
+		return "back/equipment/filling_machine";
+	}
+	
+	@RequestMapping("/labelAxis")
+	public String labelAxis(HttpServletRequest request, HttpServletResponse response) throws IOException {
+		return "/back/label/axis";
+	}
+	
+	@RequestMapping("/labelLogin")
+	public String labelLogin(HttpServletRequest request, HttpServletResponse response) throws IOException {
+		return "/back/label/login";
+	}
+	
+	@RequestMapping("/ascii")
+	public String ascii(HttpServletRequest request, HttpServletResponse response) throws IOException {
+		return "/back/ascii/ascii";
+	}
 
 }
