@@ -12,11 +12,19 @@
         <param-name>webAppRootKey</param-name>
         <param-value>jeefw.webapp.root</param-value>
     </context-param>
+    	<context-param>
+        <param-name>socketPort</param-name>
+        <param-value>17001</param-value>
+    </context-param>
 	<listener>
         <listener-class>org.springframework.web.util.Log4jConfigListener</listener-class>
     </listener>
 	<listener>
 		<listener-class>org.springframework.web.context.ContextLoaderListener</listener-class>
+	</listener>
+		<!-- 此注释里代码的作用是在启动socket服务 -->
+	<listener>
+		<listener-class>core.web.SocketServerListener</listener-class>
 	</listener>
 	<!-- 此注释里代码的作用是在应用服务器启动时初始化一些功能。可配置，不影响框架使用。 -->
 	<!-- 

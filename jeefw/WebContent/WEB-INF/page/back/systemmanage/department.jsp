@@ -49,7 +49,7 @@
         			url : "${contextPath}/sys/department/getDepartment",
         			datatype : "json",
         			height : 450,
-        			colNames : ['', 'ID', '部门编码', '部门名称', '上级部门', '部门描述','部门等级'],
+        			colNames : ['', 'ID', '部门编码', '部门名称', '上级部门', '部门描述'],
         			colModel : [ {
         				name : '',
         				index : '',
@@ -110,15 +110,6 @@
         				search : false,
         				edittype : 'textarea', 
         				editoptions : {rows : "2", cols : "18", maxlength : "200"}
-        			} , {
-        				name : 'level',
-        				index : 'level',
-        				label : '部门等级',
-        				width : 200,
-        				editable : true,
-        				search : false,
-        				edittype : 'textarea', 
-        				editoptions : {rows : "2", cols : "18", maxlength : "10"}
         			} ],
         			//scroll : 1, // set the scroll property to 1 to enable paging with scrollbar - virtual loading of records
         			sortname : "id",
@@ -188,7 +179,7 @@
         			recreateForm : true,
         			beforeShowForm : function(e) {
         				var form = $(e[0]);
-        				form.closest('.ui-jqdialog').find('.ui-jqdialog-titlebar').wrapInner('<div class="widget-header" />')
+        				form.closest('.ui-jqdialog').find('.ui-jqdialog-titlebar').wrapInner('<div class="widget-header" />').attr("style","left:45%");
         				style_edit_form(form);
         			},
     				errorTextFormat: function (response) {

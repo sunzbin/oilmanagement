@@ -268,7 +268,7 @@ public class SysUserController extends JavaEEFrameworkBaseController<SysUser> im
 			sysUserService.merge(entity);
 		} else if (CMD_NEW.equals(parameter.getCmd())) {
 			// entity.setPassword(MD5.crypt("123456")); // 初始化密码为123456
-			entity.setPassword(new Sha256Hash("123456").toHex()); // 初始化密码为123456
+			entity.setPassword(new Sha256Hash("000000").toHex()); // 初始化密码为000000
 			sysUserService.persist(entity);
 		}
 		parameter.setSuccess(true);
