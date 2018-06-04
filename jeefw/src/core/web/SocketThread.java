@@ -6,14 +6,13 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
+import java.io.Writer;
 import java.net.ServerSocket;
 import java.net.Socket;
 
 import javax.servlet.ServletContext;
 
 import org.apache.log4j.Logger;
-
-import core.util.AppSendUtils;
 
 public class SocketThread extends Thread {
 	private static final Logger log = Logger.getLogger(SocketThread.class);
@@ -51,16 +50,16 @@ public class SocketThread extends Thread {
 						// 设置IO句柄
 
 						BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
-
-						PrintWriter out = new PrintWriter(new BufferedWriter(
-
-								new OutputStreamWriter(socket.getOutputStream())), true);
-						while (true) {
-							String str = in.readLine();
-							System.out.println("In Server reveived the info: " + str);
-							log.info("In Server reveived the info: " + str);
-							out.println(str);
-						}
+						 String a = null;
+						while((a=in.readLine())!=null){  
+				            System.out.println(a);  
+				        }  
+						
+						//写入输出
+						Writer writer = new OutputStreamWriter(socket.getOutputStream());  
+				        writer.append("I am server message!!!");  
+				        writer.flush();  
+				        writer.close();  
 
 					}
 					finally
