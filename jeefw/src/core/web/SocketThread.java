@@ -1,18 +1,20 @@
 package core.web;
 
-import java.io.BufferedReader;
+import java.io.BufferedInputStream;
 import java.io.BufferedWriter;
+import java.io.DataInputStream;
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
-import java.io.PrintWriter;
-import java.io.Writer;
 import java.net.ServerSocket;
 import java.net.Socket;
 
 import javax.servlet.ServletContext;
 
 import org.apache.log4j.Logger;
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.support.FileSystemXmlApplicationContext;
+
+import com.jeefw.service.collection.CollectionService;
 
 public class SocketThread extends Thread {
 	private static final Logger log = Logger.getLogger(SocketThread.class);
@@ -26,12 +28,15 @@ public class SocketThread extends Thread {
 		String port = this.servletContext.getInitParameter("socketPort");
 		if (serverSocket == null) {
 			try {
+				log.info("--------------开启端口:" + port);
 				this.serverSocket = new ServerSocket(Integer.parseInt(port));
+//				this.serverSocket.setSoTimeout(10000);
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
 		}
 	}
+	
 
 	public void run() {
 		try {
@@ -41,26 +46,61 @@ public class SocketThread extends Thread {
 
 				Socket socket = serverSocket.accept();
 				count++;
-				System.out.println();
 				log.info("Server SocketThread start:" + count);
 				if (socket != null) {
+					BufferedWriter bufferedWriter = null;
 					try {
 						System.out.println("Accept the Client: " + socket);
 						log.info("Accept the Client: " + socket);
 						// 设置IO句柄
 
-						BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
-						 String a = null;
-						while((a=in.readLine())!=null){  
-				            System.out.println(a);  
-				        }  
+//						BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream(),"UTF-8"));
+//						 String a = null;
+//						while((a=in.readLine())!=null){  
+//				            System.out.println(a);  
+//				            CollectionService collectionService = null;
+//				            if(collectionService == null){
+//				            	collectionService = new CollectionServiceImpl();
+//				            }
+//				            	collectionService.saveCollectionInfo(a);
+//				        }  
+						
+						
+						//字节流
+						BufferedInputStream bis = new BufferedInputStream(
+		                        socket.getInputStream());
+
+		                DataInputStream dis = new DataInputStream(bis);
+		                byte[] bytes = new byte[1]; // 一次读取一个byte
+		                String ret = "";
+		                
+		                //获取service类
+		                String path = this.getClass().getClassLoader().getResource("").getPath();
+		                System.out.println("path = " + path);
+		                String filepath = path + "applicationContext.xml";
+		                ApplicationContext ctx = new FileSystemXmlApplicationContext(filepath);
+		                CollectionService collectionService =(CollectionService) ctx.getBean("collectionService");
+		                
+		                while (dis.read(bytes) != -1) {
+		                    ret += bytesToHexString(bytes) + " ";
+		                    if (dis.available() == 0) { //一个请求
+		                    	log.info("reiceve message:" + ret);
+		                    	System.out.println(hexStringToString(ret));
+		                    	if(ret.indexOf("fa") > -1){
+		                    		collectionService.saveCollectionInfo(hexStringToString(ret));
+		                    	}else if(hexStringToString(ret).indexOf("fa") > -1){
+		                    		collectionService.saveCollectionInfo(hexStringToString(ret));
+		                    	}else{
+		                    		log.error("接收的信息不是以‘fa’开头的信息");
+		                    	}
+		                    }
+		                }
 						
 						//写入输出
-						Writer writer = new OutputStreamWriter(socket.getOutputStream());  
-				        writer.append("I am server message!!!");  
-				        writer.flush();  
-				        writer.close();  
-
+						bufferedWriter = new BufferedWriter(new OutputStreamWriter(socket.getOutputStream()));
+						bufferedWriter.append("F5 10 01 09 01 12 05 31 32 33 34 02 01 B9 31");  
+						bufferedWriter.flush();  
+						bufferedWriter.close();  
 					}
 					finally
 					{
@@ -68,7 +108,7 @@ public class SocketThread extends Thread {
 						log.info("close the Server socket and the io.");
 						
 						socket.close();
-						serverSocket.close();
+						//closeServerSocket();
 					}
 				}
 			}
@@ -77,7 +117,6 @@ public class SocketThread extends Thread {
 			log.error("SocketThread err:" + ex.getMessage());
 		}
 	}
-
 	public void closeServerSocket() {
 		try {
 			if (serverSocket != null && !serverSocket.isClosed()) {
@@ -89,4 +128,42 @@ public class SocketThread extends Thread {
 			log.error("SocketThread err:" + ex.getMessage());
 		}
 	}
+	
+    public static String bytesToHexString(byte[] src) {
+        StringBuilder stringBuilder = new StringBuilder("");
+        if (src == null || src.length <= 0) {
+            return null;
+        }
+        for (int i = 0; i < src.length; i++) {
+            int v = src[i] & 0xFF;
+            String hv = Integer.toHexString(v);
+            if (hv.length() < 2) {
+                stringBuilder.append(0);
+            }
+            stringBuilder.append(hv);
+        }
+        return stringBuilder.toString();
+    }
+    
+    public static String hexStringToString(String s) {
+        if (s == null || s.equals("")) {
+            return null;
+        }
+        s = s.replace(" ", "");
+        byte[] baKeyword = new byte[s.length() / 2];
+        for (int i = 0; i < baKeyword.length; i++) {
+            try {
+                baKeyword[i] = (byte) (0xff & Integer.parseInt(s.substring(i * 2, i * 2 + 2), 16));
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+        try {
+            s = new String(baKeyword, "UTF-8");
+            new String();
+        } catch (Exception e1) {
+            e1.printStackTrace();
+        }
+        return s;
+    }
 }

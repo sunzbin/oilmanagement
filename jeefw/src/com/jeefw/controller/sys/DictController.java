@@ -21,6 +21,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import com.jeefw.core.Constant;
 import com.jeefw.core.JavaEEFrameworkBaseController;
 import com.jeefw.model.sys.Dict;
+import com.jeefw.service.collection.CollectionService;
 import com.jeefw.service.sys.DictService;
 
 import core.support.ExtJSBaseParameter;
@@ -39,6 +40,9 @@ public class DictController extends JavaEEFrameworkBaseController<Dict> implemen
 
 	@Resource
 	private DictService dictService;
+	
+	@Resource
+	private CollectionService collectionService;
 
 	// 查询字典的表格，包括分页、搜索和排序
 	@RequestMapping(value = "/getDict", method = { RequestMethod.POST, RequestMethod.GET })
@@ -78,6 +82,8 @@ public class DictController extends JavaEEFrameworkBaseController<Dict> implemen
 		List<Dict> dictWithSubList = dictService.queryDictWithSubList(queryResult.getResultList());
 		dictListView.setRows(dictWithSubList);
 		dictListView.setRecords(queryResult.getTotalCount());
+		
+		collectionService.saveCollectionInfo("FA 10 01 17 01 12 05 31 32 33 34 02 01 00 C8 01 01 18 05 15 13 45 5031 30 30 3264 82 C7");
 		writeJSON(response, dictListView);
 	}
 
