@@ -1,6 +1,6 @@
 package com.jeefw.dao.collection;
 
-import com.jeefw.model.collection.Collection;
+import com.jeefw.model.collection.CollectionCn;
 
 import core.dao.Dao;
 
@@ -9,9 +9,5 @@ import core.dao.Dao;
  * @author sunzb
  *
  */
-public interface CollectionCnDao extends Dao<Collection> {
-
-	public void testStr(String str);
-	
-	public void saveTest();
+public interface CollectionCnDao extends Dao<CollectionCn> {
 }

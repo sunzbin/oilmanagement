@@ -83,7 +83,7 @@ public class DictController extends JavaEEFrameworkBaseController<Dict> implemen
 		dictListView.setRows(dictWithSubList);
 		dictListView.setRecords(queryResult.getTotalCount());
 		
-		collectionService.saveCollectionInfo("FA 10 01 17 01 12 05 31 32 33 34 02 01 00 C8 01 01 18 05 15 13 45 5031 30 30 3264 82 C7");
+//		collectionService.saveCollectionInfo("FA 10 01 17 01 12 05 31 32 33 34 02 01 00 C8 01 01 18 05 15 13 45 5031 30 30 3264 82 C7");
 		writeJSON(response, dictListView);
 	}
 

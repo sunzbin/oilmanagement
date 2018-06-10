@@ -11,16 +11,18 @@ import org.hibernate.annotations.Cache;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
 import org.hibernate.annotations.GenericGenerator;
 
+import com.jeefw.model.collection.param.CollectionCnParameter;
+
 /**
  * 
  * @author sunzb
  *
  */
 @Entity
-@Table(name = "collection")
+@Table(name = "collection_cn")
 @Cache(region = "all", usage = CacheConcurrencyStrategy.READ_WRITE)
 @JsonIgnoreProperties(value = { "maxResults", "firstResult", "topCount", "sortColumns", "cmd", "queryDynamicConditions", "sortedConditions", "dynamicProperties", "success", "message", "sortColumnsString", "flag" })
-public class CollectionCn {
+public class CollectionCn  extends CollectionCnParameter {
 
 	// 各个字段的含义请查阅文档的数据库结构部分
 	private static final long serialVersionUID = 6019103858711599150L;

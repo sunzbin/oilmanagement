@@ -638,5 +638,20 @@ public class SysUserController extends JavaEEFrameworkBaseController<SysUser> im
 	public String ascii(HttpServletRequest request, HttpServletResponse response) throws IOException {
 		return "/back/ascii/ascii";
 	}
+	
+	@RequestMapping("/collection")
+	public String collection(HttpServletRequest request, HttpServletResponse response) throws IOException {
+		return "back/collection/collectionCn";
+	}
+	
+	@RequestMapping("/warningCollection")
+	public String warningCollection(HttpServletRequest request, HttpServletResponse response) throws IOException {
+		return "back/collection/warningCollection";
+	}
+
+	@RequestMapping("/carManagement")
+	public String carManagement(HttpServletRequest request, HttpServletResponse response) throws IOException {
+		return "back/car/car";
+	}
 
 }

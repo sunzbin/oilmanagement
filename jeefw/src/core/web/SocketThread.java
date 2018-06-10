@@ -10,14 +10,16 @@ import java.net.Socket;
 
 import javax.servlet.ServletContext;
 
-import org.apache.log4j.Logger;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.FileSystemXmlApplicationContext;
 
+import com.jeefw.controller.collection.CollectionCnController;
 import com.jeefw.service.collection.CollectionService;
 
 public class SocketThread extends Thread {
-	private static final Logger log = Logger.getLogger(SocketThread.class);
+	private static final Log log = LogFactory.getLog(SocketThread.class);
 	Integer count = 0;
 	private ServletContext servletContext;
 	private ServerSocket serverSocket;

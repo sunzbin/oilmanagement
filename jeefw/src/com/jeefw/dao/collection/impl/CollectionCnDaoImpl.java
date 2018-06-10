@@ -1,13 +1,9 @@
 package com.jeefw.dao.collection.impl;
 
-import java.util.List;
-
-import org.hibernate.Query;
-import org.hibernate.SQLQuery;
 import org.springframework.stereotype.Repository;
 
-import com.jeefw.dao.collection.CollectionDao;
-import com.jeefw.model.collection.Collection;
+import com.jeefw.dao.collection.CollectionCnDao;
+import com.jeefw.model.collection.CollectionCn;
 
 import core.dao.BaseDao;
 
@@ -17,20 +13,9 @@ import core.dao.BaseDao;
  *
  */
 @Repository
-public class CollectionCnDaoImpl extends BaseDao<Collection> implements CollectionDao {
+public class CollectionCnDaoImpl extends BaseDao<CollectionCn> implements CollectionCnDao {
 
 	public CollectionCnDaoImpl() {
-		super(Collection.class);
+		super(CollectionCn.class);
 	}
-	
-	public void testStr(String str){
-//		System.out.println("11111111111111111111111111");
-	}
-
-	@Override
-	public void saveTest() {
-
-		System.out.println("11111111111111111111111111");
-	}
-
 }
