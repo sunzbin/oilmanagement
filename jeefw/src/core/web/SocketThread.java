@@ -87,9 +87,9 @@ public class SocketThread extends Thread {
 		                    ret += bytesToHexString(bytes) + " ";
 		                    if (dis.available() == 0) { //一个请求
 		                    	log.info("reiceve message:" + ret);
-		                    	System.out.println(hexStringToString(ret));
+		                    	log.info("reiceve message(hexStringToString(ret)):" + hexStringToString(ret));
 		                    	if(ret.indexOf("fa") > -1){
-		                    		collectionService.saveCollectionInfo(hexStringToString(ret));
+		                    		collectionService.saveCollectionInfo(ret);
 		                    	}else if(hexStringToString(ret).indexOf("fa") > -1){
 		                    		collectionService.saveCollectionInfo(hexStringToString(ret));
 		                    	}else{
@@ -106,7 +106,6 @@ public class SocketThread extends Thread {
 					}
 					finally
 					{
-						System.out.println("close the Server socket and the io.");
 						log.info("close the Server socket and the io.");
 						
 						socket.close();
