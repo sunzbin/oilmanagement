@@ -21,8 +21,10 @@ import org.springframework.web.bind.annotation.RequestParam;
 import com.jeefw.core.Constant;
 import com.jeefw.core.JavaEEFrameworkBaseController;
 import com.jeefw.model.carmanagement.CarManagement;
+import com.jeefw.model.equipment.AxisLabel;
 import com.jeefw.model.sys.Department;
 import com.jeefw.service.car.CarService;
+import com.jeefw.service.sys.DepartmentService;
 
 import core.support.ExtJSBaseParameter;
 import core.support.JqGridPageView;
@@ -39,6 +41,9 @@ public class CarController extends JavaEEFrameworkBaseController<CarManagement> 
 
 	@Resource
 	private CarService carService;
+	
+	@Resource
+	private DepartmentService departmentService;
 
 	// 查询部门的表格，包括分页、搜索和排序
 	@RequestMapping(value = "/getCar", method = { RequestMethod.POST, RequestMethod.GET })
@@ -73,12 +78,20 @@ public class CarController extends JavaEEFrameworkBaseController<CarManagement> 
 		sortedCondition.put(sortedObject, sortedValue);
 		car.setSortedConditions(sortedCondition);
 		QueryResult<CarManagement> queryResult = carService.doPaginationQuery(car);
-		JqGridPageView<CarManagement> departmentListView = new JqGridPageView<CarManagement>();
-		departmentListView.setMaxResults(maxResults);
-		List<CarManagement> departmentCnList = carService.queryDepartmentCnList(queryResult.getResultList());
-		departmentListView.setRows(departmentCnList);
-		departmentListView.setRecords(queryResult.getTotalCount());
-		writeJSON(response, departmentListView);
+		for (int i = 0; i < queryResult.getResultList().size(); i++) {
+			Department department = departmentService.get(Long.valueOf(queryResult.getResultList().get(i).getDepartmentId()));
+			queryResult.getResultList().get(i).setDepartmentId(department.getDepartmentValue());
+		}
+//		JqGridPageView<CarManagement> departmentListView = new JqGridPageView<CarManagement>();
+//		departmentListView.setMaxResults(maxResults);
+//		List<CarManagement> departmentCnList = carService.queryDepartmentCnList(queryResult.getResultList());
+//		departmentListView.setRows(departmentCnList);
+//		departmentListView.setRecords(queryResult.getTotalCount());
+		JqGridPageView<CarManagement> carManagementListView = new JqGridPageView<CarManagement>();
+		carManagementListView.setMaxResults(maxResults);
+		carManagementListView.setRows(queryResult.getResultList());
+		carManagementListView.setRecords(queryResult.getTotalCount());
+		writeJSON(response, carManagementListView);
 	}
 
 	// 保存部门的实体Bean
@@ -120,29 +133,19 @@ public class CarController extends JavaEEFrameworkBaseController<CarManagement> 
 			String carTypeCode = request.getParameter("carTypeCode");
 			String carNum = request.getParameter("carNum");
 			String departmentId = request.getParameter("departmentId");
-			CarManagement department = null;
+			CarManagement entity = new CarManagement();
+			entity.setCarNum(carNum);
+			entity.setCarType(carType);
+			entity.setCarTypeCode(carTypeCode);
+			entity.setDepartmentId(departmentId);
 			if (oper.equals("edit")) {
-				department = carService.get(Long.valueOf(id));
-			}
-			CarManagement departmentKeyDepartment = carService.getByProerties("carType", carType);
-			CarManagement parentDepartmentkeyDepartment = carService.getByProerties("carTypeCode", carTypeCode);
-				CarManagement entity = new CarManagement();
-				entity.setCarNum(carNum);
-				entity.setCarType(carType);
-				entity.setCarTypeCode(carTypeCode);
-				entity.setDepartmentId(departmentId);
-//				entity.setDepartmentKey(departmentKey);
-//				entity.setDepartmentValue(departmentValue);
-//				entity.setParentDepartmentkey(parentDepartmentkey);
-//				entity.setDescription(description);
-				if (oper.equals("edit")) {
-					entity.setId(id);
-					entity.setCmd("edit");
-					saveCar(entity, request, response);
-				} else if (oper.equals("add")) {
-					entity.setCmd("new");
-					saveCar(entity, request, response);
-			}
+				entity.setId(id);
+				entity.setCmd("edit");
+				saveCar(entity, request, response);
+			} else if (oper.equals("add")) {
+				entity.setCmd("new");
+				saveCar(entity, request, response);
+		}
 		}
 	}
 
