@@ -1,10 +1,11 @@
 package com.jeefw.controller.equipment;
 
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.io.OutputStream;
-import java.net.URLDecoder;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -17,6 +18,14 @@ import javax.servlet.http.HttpSession;
 
 import org.apache.commons.beanutils.ConvertUtils;
 import org.apache.commons.lang.StringUtils;
+import org.apache.log4j.Logger;
+import org.apache.poi.hssf.usermodel.HSSFCell;
+import org.apache.poi.hssf.usermodel.HSSFRow;
+import org.apache.poi.hssf.usermodel.HSSFSheet;
+import org.apache.poi.hssf.usermodel.HSSFWorkbook;
+import org.apache.poi.ss.usermodel.DateUtil;
+import org.apache.poi.ss.util.Region;
+import org.springframework.expression.ParseException;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -24,8 +33,10 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.ModelAndView;
 
+import com.google.gson.Gson;
 import com.jeefw.core.Constant;
 import com.jeefw.core.JavaEEFrameworkBaseController;
+import com.jeefw.model.equipment.AscII;
 import com.jeefw.model.equipment.AxisLabel;
 import com.jeefw.model.sys.Dict;
 import com.jeefw.service.equipment.AscIIService;
@@ -35,9 +46,12 @@ import com.jeefw.service.sys.DictService;
 import core.support.ExtJSBaseParameter;
 import core.support.JqGridPageView;
 import core.support.QueryResult;
+import core.util.DownloadBase;
 import core.util.FileUpload;
+import core.util.HexAccumulation;
 import core.util.ObjectExcelRead;
 import core.util.PathUtil;
+import core.util.StringUtil;
 import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
 
@@ -50,6 +64,8 @@ import net.sf.json.JSONObject;
 @Controller
 @RequestMapping("/labelAxis")
 public class AxisLabelController extends JavaEEFrameworkBaseController<AxisLabel> implements Constant {
+	
+	Logger logger = Logger.getLogger(AxisLabelController.class);
 	
 	@Resource
 	private AxisLabelService axisLabelService;
@@ -94,6 +110,8 @@ public class AxisLabelController extends JavaEEFrameworkBaseController<AxisLabel
 			axisLabel.setSortedConditions(sortedCondition);
 			QueryResult<AxisLabel> queryResult = axisLabelService.doPaginationQuery(axisLabel);
 			List<AxisLabel> resultList =  queryResult.getResultList();
+			logger.info(resultList.size());
+			logger.info("~~~~~~~~~~~"+new Gson().toJson(resultList).toString());
 			for (int i = 0; i < resultList.size(); i++) {
 				String[] findLabelTypeKey = new String [2];
 				findLabelTypeKey[0] = "dictKey";
@@ -112,14 +130,15 @@ public class AxisLabelController extends JavaEEFrameworkBaseController<AxisLabel
 				findCarCodeValue[1] = "CAR_CODE";
 				Dict carCode = dictService.getByProerties(findCarCodeKey,findCarCodeValue);
 				resultList.get(i).setCarCode(carCode.getDictValue());//设置车型代码
-				
-				String carNumber = 
-						ascIIService.getByProerties("hex", resultList.get(i).getCarNumber().split(",")[0]).getCharacters()+
-						ascIIService.getByProerties("hex", resultList.get(i).getCarNumber().split(",")[1]).getCharacters()+
-						ascIIService.getByProerties("hex", resultList.get(i).getCarNumber().split(",")[2]).getCharacters()+
-						ascIIService.getByProerties("hex", resultList.get(i).getCarNumber().split(",")[3]).getCharacters();
-				resultList.get(i).setCarNumber(carNumber);
-				
+				if(!StringUtil.isEmpty(resultList.get(i).getCarNumber())) {
+					String[] carNumberArray = resultList.get(i).getCarNumber().split(",");
+					String carNumber = "";
+					for (int j = 0; j < carNumberArray.length; j++) {
+//						carNumber += ascIIService.getByProerties("hex", carNumberArray[j]).getCharacters();
+						carNumber += carNumberArray[j];
+					}
+					resultList.get(i).setCarNumber(carNumber);
+				}
 				String[] findAxialPositionKey = new String [2];
 				findAxialPositionKey[0] = "dictKey";
 				findAxialPositionKey[1] = "parentDictkey";
@@ -206,23 +225,26 @@ public class AxisLabelController extends JavaEEFrameworkBaseController<AxisLabel
 		
 		// 操作字典的删除、导出Excel、字段判断和保存
 		@RequestMapping(value = "/operateLabelAxis", method = { RequestMethod.POST, RequestMethod.GET })
-		public void operateDict(HttpServletRequest request, HttpServletResponse response) throws Exception {
+		public void operateLabelAxis(HttpServletRequest request, HttpServletResponse response) throws Exception {
 			String oper = request.getParameter("oper");
 			String id = request.getParameter("id");
 			if (oper.equals("del")) {
 				String[] ids = id.split(",");
 				deleteLabelAxis(request, response, (Long[]) ConvertUtils.convert(ids, Long.class));
 			} else if (oper.equals("excel")) {
-				response.setContentType("application/msexcel;charset=UTF-8");
-				try {
-					response.addHeader("Content-Disposition", "attachment;filename=file.xls");
-					OutputStream out = response.getOutputStream();
-					out.write(URLDecoder.decode(request.getParameter("csvBuffer"), "UTF-8").getBytes());
-					out.flush();
-					out.close();
-				} catch (Exception e) {
-					e.printStackTrace();
+				String ids = request.getParameter("ids");
+				String[] ids1 = ids.split(",");
+				String[] tetle = new String [2];
+				tetle[0]= "序号";
+				tetle[1]= "标签内容";
+				List<AxisLabel> varList = new ArrayList<AxisLabel>();
+				for(int i=0;i<ids1.length;i++){
+					AxisLabel axisLabel = axisLabelService.get(Long.valueOf(ids1[i]));
+					if(null != varList && !"".equals(varList)) {
+						varList.add(axisLabel);
+					}
 				}
+				print(varList,response);
 			} else {
 				Map<String, Object> result = new HashMap<String, Object>();
 				AxisLabel axisLabel = null;
@@ -230,10 +252,18 @@ public class AxisLabelController extends JavaEEFrameworkBaseController<AxisLabel
 					axisLabel = axisLabelService.get(Long.valueOf(id));
 				}
 				AxisLabel entity = new AxisLabel();
+				entity.setLabelType(request.getParameter("labelType"));
+				entity.setCarCode(request.getParameter("carCode"));
+				entity.setCarNumber(request.getParameter("carNumber"));
+				entity.setAxialPosition(request.getParameter("axialPosition"));
+				entity.setPointPosition(request.getParameter("pointPosition"));
+				entity.setSpare_one("00");
+				entity.setSpare_two("00");
+				entity.setGreaseTypeCode(request.getParameter("greaseTypeCode"));
 				if (oper.equals("edit")) {
 					entity.setId(Long.valueOf(id));
 					entity.setCmd("edit");
-					doSave(entity, request, response);
+					doSave(axisLabel, request, response);
 				} else if (oper.equals("add")) {
 					entity.setCmd("new");
 					doSave(entity, request, response);
@@ -244,10 +274,36 @@ public class AxisLabelController extends JavaEEFrameworkBaseController<AxisLabel
 		// 保存标签的实体Bean
 		@RequestMapping(value = "/saveLabelAxis", method = { RequestMethod.POST, RequestMethod.GET })
 		public void doSave(AxisLabel entity, HttpServletRequest request, HttpServletResponse response) throws IOException {
+			logger.info("*******************"
+					+ "labelType:"+entity.getLabelType()+"------------"
+					+ "carCode:"+entity.getCarCode()+"------------"
+					+ "carNumber:"+entity.getCarNumber()+"------------"
+					+ "axialPosition:"+entity.getAxialPosition()+"------------"
+					+ "pointPosition:"+entity.getPointPosition()+"------------"
+					+ "greaseTypeCode:"+entity.getGreaseTypeCode()+"------------"
+					+ "***************************");
+			char[] charCarNumber = entity.getCarNumber().toCharArray();
+			String carNumber = "";
+			String carNumberChar = "";
+			String checkbit = entity.getLabelType()+entity.getCarCode();
+			logger.info("################"+charCarNumber.length);
+			for (int i = 0; i < charCarNumber.length; i++) {
+				carNumberChar += charCarNumber[i]+",";
+				AscII ascII = ascIIService.getByProerties("characters", charCarNumber[i]+"");
+				String hex = ascII.getHex();
+				carNumber += hex+",";
+				checkbit+=hex;
+			}
+			entity.setCarNumber(carNumberChar);
+			checkbit += entity.getAxialPosition()+entity.getPointPosition()+entity.getGreaseTypeCode()+entity.getSpare_one()+entity.getSpare_two();
+			checkbit = HexAccumulation.getCheckCode(checkbit);
+			entity.setCheckoutBit(checkbit.substring(checkbit.length()-2));
 			ExtJSBaseParameter parameter = ((ExtJSBaseParameter) entity);
 			if (CMD_EDIT.equals(parameter.getCmd())) {
+				logger.info("start edit info");
 				axisLabelService.merge(entity);
 			} else if (CMD_NEW.equals(parameter.getCmd())) {
+				logger.info("start sava info");
 				axisLabelService.persist(entity);
 			}
 			parameter.setSuccess(true);
@@ -264,4 +320,52 @@ public class AxisLabelController extends JavaEEFrameworkBaseController<AxisLabel
 				writeJSON(response, "{success:false}");
 			}
 		}
+		public  void print(List<AxisLabel> prints, HttpServletResponse response) throws FileNotFoundException, IOException, ParseException{
+			String fileName = "label";
+			
+			HSSFWorkbook wb = new HSSFWorkbook(); // 新建工作簿
+			
+			int rowNo = 1;				//行号
+			short colNo = 0;			//列号
+			
+			HSSFSheet sheet = wb.createSheet(fileName);		//得到第一个工作表
+			
+			HSSFRow nRow = sheet.createRow(0);
+
+			HSSFCell nCell = nRow.createCell(colNo++);
+			nCell.setCellValue("序号");
+		
+			nCell = nRow.createCell(colNo++);
+			nCell.setCellValue("标签内容");
+			
+			for(int i=0;i<prints.size();i++){
+				colNo = 0;//初始化
+				nRow = sheet.createRow(rowNo++);
+				nRow.setHeightInPoints(24);
+				
+				nCell = nRow.createCell(colNo++);
+				nCell.setCellValue(i);
+				String[]  carNumberArray = prints.get(i).getCarNumber().split(",");
+				String carNumber = "";
+				for (int j = 0; j < carNumberArray.length; j++) {
+					carNumber += ascIIService.getByProerties("characters", carNumberArray[j]).getHex()+" ";
+				}
+				String comment= prints.get(i).getLabelType()+" "+prints.get(i).getCarCode()+" "
+				+carNumber+" "
+				+prints.get(i).getAxialPosition()+" "+prints.get(i).getPointPosition()+" "+ prints.get(i).getGreaseTypeCode()
+				+" "+ prints.get(i).getSpare_one()+" "+ prints.get(i).getSpare_two()+" "+prints.get(i).getCheckoutBit();
+				nCell = nRow.createCell(colNo++);
+				nCell.setCellValue(comment);
+				
+			}
+			
+			//7.生成excel文件
+			ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();			//生成流对象
+			wb.write(byteArrayOutputStream);								//将excel写入流
+
+			//工具类，封装弹出下载框：		
+			String outFile = new StringBuffer(fileName).append(".xls").toString();
+			DownloadBase down = new DownloadBase();
+			down.download(byteArrayOutputStream, response, outFile);
+		}		
 }
