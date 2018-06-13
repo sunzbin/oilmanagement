@@ -82,7 +82,8 @@
         				label : '标签类型',
         				width : 120,
         				editable : true,
-        				editoptions : {size : "20", maxlength : "20"},
+        				edittype : 'select',
+        				editoptions : {value:'10:轴位标签'},
         				searchoptions : {sopt : ['eq']},
         				editrules : {required : true}
         			}, {
@@ -91,7 +92,17 @@
         				label : '车型代码',
         				width : 160,
         				editable : true,
-        				editoptions : {size : "20", maxlength : "40"},
+        				edittype : 'select',
+        				editoptions : {value:'01:SS7C;02:SS7E;03:HXD1D;04:HXD3D;05:HXD3G',
+        										dataEvents:[{
+							        					type: 'change', //下拉选择的时候
+							        					fn: function (e) {//触发方法
+							       							//获取当前下拉框的id名字（这是点击编辑按钮时才需要的，因为点击编辑按钮后，schoolName的下拉框会变成1_roleid,其中”1“是行号）
+										        			var itemName = this.id;
+										        			var carCodeid = this.value; //获取选中的角色名称
+										        			getPointPosition(carCodeid); //调用获取角色下对应用户信息data的方法
+							        					}
+        										}]},
         				searchoptions : {sopt : ['cn']},
         				editrules : {required : true}
         			}, {
@@ -100,16 +111,18 @@
         				label : '车号',
         				width : 100,
         				editable : true,
-        				editoptions : {size : "20", maxlength : "40"},
+        				editoptions : {size : "20", maxlength : "4"},
         				searchoptions : {sopt : ['cn']},
-        				editrules : {required : true}
+        				editrules : {required : true,number:true}
+        				
         			}, {
         				name : 'axialPosition',
         				index : 'axialPosition',
         				label : '轴位',
         				width : 110,
         				editable : true,
-        				editoptions : {size : "20", maxlength : "40"},
+        				edittype : 'select',
+        				editoptions : {value:'31:一轴;32:二轴;33:三轴;34:四轴;35:五轴;36:六轴'},
         				searchoptions : {sopt : ['cn']},
         				editrules : {required : true}
         			}, {
@@ -118,7 +131,8 @@
         				label : '点位',
         				width : 100,
         				editable : true,
-        				editoptions : {size : "20", maxlength : "40"},
+        				edittype : 'select',
+        				editoptions : {value:'01:牵引电机传动端;02:抱轴体;03:牵引电机非传动端	'},
         				searchoptions : {sopt : ['cn']},
         				editrules : {required : true}
         			}, {
@@ -127,7 +141,8 @@
         				label : '油脂类型代码',
         				width : 100,
         				editable : true,
-        				editoptions : {size : "20", maxlength : "40"},
+        				edittype : 'select',
+        				editoptions : {value:'00:无'},
         				searchoptions : {sopt : ['cn']},
         				editrules : {required : true}
         			}],
@@ -177,6 +192,20 @@
         				$(cell).find('input[type=checkbox]').addClass('ace ace-switch ace-switch-5').after('<span class="lbl"></span>');
         			}, 0);
         		}
+        		
+        		function getPointPosition(carCodeid) {  
+                    var str =''; //用来存放option值    
+                    //将增加操作的弹出菜单中的roleid的下拉框内容清空（因为每次切换内容都需要变更）    
+                    $("select#pointPosition").empty();
+                    if(carCodeid==02){
+                    	 str += '<option value="01">牵引电机传动端</option><option value="02">抱轴体</option><option value="03">牵引电机非传动端	</option>';
+                    }else{
+                    	str += '<option value="01">牵引电机传动端</option>';
+                    }
+                  //获取下面下拉框对象    
+                    var pointPosition = $("select#pointPosition");       
+                    pointPosition.append(str);//渲染option 
+                }  
         		
         		// navButtons
         		var jqnav = jQuery(grid_selector).jqGrid('navGrid', pager_selector, { // navbar options
@@ -281,14 +310,19 @@
             }); 
 
         		// add custom button to export the data to excel
-        		if(<shiro:hasPermission name="${ROLE_KEY}:dict:export">true</shiro:hasPermission><shiro:lacksPermission name="${ROLE_KEY}:dict:export">false</shiro:lacksPermission>){
+        		if(<shiro:hasPermission name="${ROLE_KEY}:axislabel:export">true</shiro:hasPermission><shiro:lacksPermission name="${ROLE_KEY}:axislabel:export">false</shiro:lacksPermission>){
     				jQuery(grid_selector).jqGrid('navButtonAdd', pager_selector,{
    					   caption : "",
    				       title : "导出Excel",
    				       buttonicon : "ace-icon fa fa-file-excel-o green", 
    				       onClickButton : function () { 
    				    	   var keys = [], ii = 0, rows = "";
-   				    	   var ids = $(grid_selector).getDataIDs(); // Get All IDs
+   				    	   var ids = $(grid_selector).jqGrid('getGridParam','selarrrow');
+   				    	   if(ids=='' || ids==null){
+   				    		   alert('请选择要导出的数据!');
+   				    		   return false;
+   				    	   }
+   				    	   //var ids = $(grid_selector).getDataIDs(); // Get All IDs
    				    	   var row = $(grid_selector).getRowData(ids[0]); // Get First row to get the labels
    				    	   //var label = $(grid_selector).jqGrid('getGridParam','colNames');
    	   			    	   for (var k in row) {
@@ -303,8 +337,9 @@
    				    	   	   rows = rows + "\n"; // output each row with end of line
    				    	   }
    				    	   rows = rows + "\n"; // end of line at the end
-   				    	   var form = "<form name='csvexportform' action='${contextPath}/sys/dict/operateDict?oper=excel' method='post'>";
+   				    	   var form = "<form name='csvexportform' action='${contextPath}/labelAxis/operateLabelAxis?oper=excel' method='post'>";
    				    	   form = form + "<input type='hidden' name='csvBuffer' value='" + encodeURIComponent(rows) + "'>";
+   				    	form = form + "<input type='hidden' name='ids' value='" + ids+ "'>";
    				    	   form = form + "</form><script>document.csvexportform.submit();</sc" + "ript>";
    				    	   OpenWindow = window.open('', '');
    				    	   OpenWindow.document.write(form);
