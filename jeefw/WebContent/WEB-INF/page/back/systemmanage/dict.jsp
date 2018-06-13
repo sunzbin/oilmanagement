@@ -80,7 +80,7 @@
         				label : '字典编码',
         				width : 120,
         				editable : true,
-        				editoptions : {size : "20", maxlength : "20"},
+        				editoptions : {size : "50", maxlength : "50"},
         				searchoptions : {sopt : ['eq']},
         				editrules : {required : true}
         			}, {
@@ -107,7 +107,7 @@
         				label : '上级字典编码',
         				width : 110,
         				editable : true,
-        				editoptions : {size : "20", maxlength : "20", title : "如果没有上级，不填即可"},
+        				editoptions : {size : "50", maxlength : "50", title : "如果没有上级，不填即可"},
         				search : false
         			} ],
         			//scroll : 1, // set the scroll property to 1 to enable paging with scrollbar - virtual loading of records

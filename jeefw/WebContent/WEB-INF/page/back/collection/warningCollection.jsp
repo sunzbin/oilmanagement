@@ -146,13 +146,14 @@
         				editable : true,
         				search : false
         			}, {
-        				name : '',
-        				index : '',
+        				name : 'jiazhuTime',
+        				index : 'jiazhuTime',
         				label : '预警信息',
         				width : 80,
         				editable : true,
-        				search : false
-        			} ],
+        				search : false,
+        				formatter : imageFormat
+        			}],
         			//scroll : 1, // set the scroll property to 1 to enable paging with scrollbar - virtual loading of records
         			sortname : "id",
         			sortorder : "asc",
@@ -334,6 +335,21 @@
         				container : 'body'
         			});
         		}
+        		function imageFormat( cellvalue, options, rowObject ){  
+        			var timestamp = Date.parse(new Date(cellvalue));
+        			var timestamp1 = new Date().getTime();
+        			var param = timestamp1 - timestamp;
+        			var blue = "${SESSION_WARNNING_BLUE_PARAM}";
+        			var orange = "${SESSION_WARNNING_ORANGE_PARAM}";
+        			console.log(blue + "-----------------" + orange);
+        			if(param <=  60 * 60 *1000 * blue){//离加注时间一天以内为蓝色预警
+        				return '<i class="fa fa-flag blue bigger-130"></i>';  
+        			}else if((param >  60 * 60 *1000 * blue) && (param <= 60 * 60 *1000 * orange)){//离加注时间一天到三天为黄色预警
+        				return '<i class="fa fa-flag orange bigger-130"></i>';  
+        			}else{//离加注时间超过三天为红色预警
+        				return '<i class="fa fa-flag red bigger-130"></i>';  
+        			}
+				}  
 
         		// var selr = jQuery(grid_selector).jqGrid('getGridParam','selrow');
 
