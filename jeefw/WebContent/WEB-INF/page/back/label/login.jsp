@@ -80,7 +80,8 @@
         				label : '标签类型',
         				width : 120,
         				editable : true,
-        				editoptions : {size : "20", maxlength : "20"},
+        				edittype : 'select',
+        				editoptions : {value:'11:登录标签'},
         				searchoptions : {sopt : ['eq']},
         				editrules : {required : true}
         			}, {
