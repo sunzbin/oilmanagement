@@ -97,8 +97,9 @@ public class AxisPointController extends JavaEEFrameworkBaseController<CarAxisPo
 				if(!StringUtil.isEmpty(axisPoint)) {
 					queryResult.getResultList().get(i).setAxis_name(axisPoint.getAxis_name());
 					queryResult.getResultList().get(i).setAxis_code(axisPoint.getAxis_code());
+					queryResult.getResultList().get(i).setCarId(axisPoint.getAscription_loco());
 				}
-				CarManagement car = carService.get(queryResult.getResultList().get(i).getAscription_loco());
+				CarManagement car = carService.get(queryResult.getResultList().get(i).getCarId());
 				if(!StringUtil.isNull(car)) {
 					if(car.getCarType().equals("01")) {
 						car.setCarType("SS7C");
@@ -161,7 +162,7 @@ public class AxisPointController extends JavaEEFrameworkBaseController<CarAxisPo
 			entity.setPid(Long.valueOf(request.getParameter("axis_name")));
 			entity.setPoint_name(request.getParameter("point_name"));
 			entity.setPoint_code(request.getParameter("point_code"));
-			entity.setAscription_loco(request.getParameter("ascription_loco"));
+//			entity.setAscription_loco(request.getParameter("ascription_loco"));
 			if (oper.equals("edit")) {
 				entity.setId(Long.valueOf(id));
 				entity.setCmd("edit");
