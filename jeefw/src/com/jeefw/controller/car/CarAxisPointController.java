@@ -8,6 +8,7 @@ package com.jeefw.controller.car;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.net.URLDecoder;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -88,26 +89,30 @@ public class CarAxisPointController extends JavaEEFrameworkBaseController<CarAxi
 		sortedCondition.put(sortedObject, sortedValue);
 		carAxisPoint.setSortedConditions(sortedCondition);
 		QueryResult<CarAxisPoint> queryResult = carAxisPointAxisService.doPaginationQuery(carAxisPoint);
+		List<CarAxisPoint> resultList = new ArrayList<>();
 		for (int i = 0; i < queryResult.getResultList().size(); i++) {
-			CarManagement car = carService.get(queryResult.getResultList().get(i).getAscription_loco());
-			if(!StringUtil.isNull(car)) {
-				if(car.getCarType().equals("01")) {
-					car.setCarType("SS7C");
-				}else if(car.getCarType().equals("02")) {
-					car.setCarType("SS7E");	
-				}else if(car.getCarType().equals("03")) {
-					car.setCarType("HXD1D");
-				}else if(car.getCarType().equals("04")) {
-					car.setCarType("HXD3D");
-				}else if(car.getCarType().equals("05")) {
-					car.setCarType("HXD3G");
+			if(StringUtil.isEmpty(queryResult.getResultList().get(i).getPid())) {
+				CarManagement car = carService.get(queryResult.getResultList().get(i).getAscription_loco());
+				if(!StringUtil.isNull(car)) {
+					if(car.getCarType().equals("01")) {
+						car.setCarType("SS7C");
+					}else if(car.getCarType().equals("02")) {
+						car.setCarType("SS7E");	
+					}else if(car.getCarType().equals("03")) {
+						car.setCarType("HXD1D");
+					}else if(car.getCarType().equals("04")) {
+						car.setCarType("HXD3D");
+					}else if(car.getCarType().equals("05")) {
+						car.setCarType("HXD3G");
+					}
+					queryResult.getResultList().get(i).setAscription_loco("车型:"+car.getCarType()+","+"车号:"+car.getCarNum());
 				}
-				queryResult.getResultList().get(i).setAscription_loco("车型:"+car.getCarType()+","+"车号:"+car.getCarNum());
+				resultList.add(queryResult.getResultList().get(i));
 			}
 		}
 		JqGridPageView<CarAxisPoint> dictListView = new JqGridPageView<CarAxisPoint>();
 		dictListView.setMaxResults(maxResults);
-		dictListView.setRows(queryResult.getResultList());
+		dictListView.setRows(resultList);
 		dictListView.setRecords(queryResult.getTotalCount());
 		writeJSON(response, dictListView);
 	}

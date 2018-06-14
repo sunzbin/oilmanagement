@@ -94,8 +94,10 @@ public class AxisPointController extends JavaEEFrameworkBaseController<CarAxisPo
 		for (int i = 0; i < queryResult.getResultList().size(); i++) {
 			if(!StringUtil.isEmpty(queryResult.getResultList().get(i).getPid())) {
 				CarAxisPoint axisPoint = carAxisPointAxisService.get(queryResult.getResultList().get(i).getPid());
-				queryResult.getResultList().get(i).setAxis_name(axisPoint.getAxis_name());
-				queryResult.getResultList().get(i).setAxis_code(axisPoint.getAxis_code());
+				if(!StringUtil.isEmpty(axisPoint)) {
+					queryResult.getResultList().get(i).setAxis_name(axisPoint.getAxis_name());
+					queryResult.getResultList().get(i).setAxis_code(axisPoint.getAxis_code());
+				}
 				CarManagement car = carService.get(queryResult.getResultList().get(i).getAscription_loco());
 				if(!StringUtil.isNull(car)) {
 					if(car.getCarType().equals("01")) {
