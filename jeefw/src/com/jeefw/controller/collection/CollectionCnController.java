@@ -13,6 +13,9 @@ import javax.servlet.http.HttpServletResponse;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.shiro.SecurityUtils;
+import org.apache.shiro.session.Session;
+import org.apache.shiro.subject.Subject;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -22,6 +25,7 @@ import com.jeefw.core.JavaEEFrameworkBaseController;
 import com.jeefw.model.collection.CollectionCn;
 import com.jeefw.model.sys.Dict;
 import com.jeefw.service.collection.CollectionCnService;
+import com.jeefw.service.sys.DictService;
 
 import core.support.JqGridPageView;
 import core.support.QueryResult;
@@ -37,6 +41,9 @@ import net.sf.json.JSONObject;
 public class CollectionCnController extends JavaEEFrameworkBaseController<CollectionCn> implements Constant {
 
 	private static final Log log = LogFactory.getLog(CollectionCnController.class);
+	
+	@Resource
+	private DictService dictService;
 	
 	@Resource
 	private CollectionCnService collectionCnService;
@@ -83,13 +90,26 @@ public class CollectionCnController extends JavaEEFrameworkBaseController<Collec
 		dictListView.setRows(dictWithSubList);
 		dictListView.setRecords(queryResult.getTotalCount());
 		
+		//-------------------------获取预警参数信息------------------------------
+		
+		Subject subject = SecurityUtils.getSubject();
+		Session session = subject.getSession();
+		List<Dict> dicts =  dictService.queryByProerties("parentDictkey", SESSION_WARNNING_PARAM);
+		if(dicts != null ){
+			for(int i = 0; i < dicts.size(); i++){
+				if(SESSION_WARNNING_BLUE_PARAM.equals(dicts.get(i).getDictKey())){
+					session.setAttribute(SESSION_WARNNING_BLUE_PARAM, dicts.get(i).getDictValue());
+				}else if(SESSION_WARNNING_ORANGE_PARAM.equals(dicts.get(i).getDictKey())){
+					session.setAttribute(SESSION_WARNNING_ORANGE_PARAM, dicts.get(i).getDictValue());
+				}
+			}
+		}
+		if(session.getAttribute(SESSION_WARNNING_BLUE_PARAM) == null || session.getAttribute(SESSION_WARNNING_ORANGE_PARAM) ==null){
+			session.setAttribute(SESSION_WARNNING_BLUE_PARAM, 1*24);
+			session.setAttribute(SESSION_WARNNING_ORANGE_PARAM, 3*24);
+		}
+		
 		writeJSON(response, dictListView);
 	}
-	
-//	@RequestMapping("/collection")
-//	public String sysuser(HttpServletRequest request, HttpServletResponse response) throws IOException {
-//		System.out.println("11111111111111111111111111111111111111");
-//		return "back/collection/collectionCn";
-//	}
 
 }

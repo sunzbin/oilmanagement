@@ -1,5 +1,8 @@
 package com.jeefw.service.collection.impl;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+
 import javax.annotation.Resource;
 
 import org.springframework.stereotype.Service;
@@ -33,7 +36,7 @@ public class CollectionServiceImpl extends BaseService<Collection> implements Co
 
 	
 	@Override
-	public boolean saveCollectionInfo(String str) {
+	public boolean saveCollectionInfo(String str) throws ParseException {
 			if(str != null && !"".equals(str) && str.indexOf("fa") > -1){
 				String[] element = str.split("\\s+");
 				if(element != null && element.length > 0){
@@ -49,8 +52,9 @@ public class CollectionServiceImpl extends BaseService<Collection> implements Co
 	 * 解析采集到的数据信息
 	 * @param strs
 	 * @return
+	 * @throws ParseException 
 	 */
-	private boolean anaStr(String[] strs){
+	private boolean anaStr(String[] strs) throws ParseException{
 		
 		Collection coll = new Collection();
 		CollectionCn collCn = new CollectionCn();
@@ -194,8 +198,10 @@ public class CollectionServiceImpl extends BaseService<Collection> implements Co
 				}
 				
 				if(i == 24){
-					coll.setJiazhuTime(jiazhuTime);
-					collCn.setJiazhuTime(jiazhuTime);
+					SimpleDateFormat sdf  = new SimpleDateFormat("yyyyMMddHHmmss");
+					SimpleDateFormat sdf1  = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+					coll.setJiazhuTime(sdf1.format(sdf.parse(jiazhuTime)));
+					collCn.setJiazhuTime(sdf1.format(sdf.parse(jiazhuTime)));
 				}
 				
 			}else if(i == 25 || i == 26 || i == 27 || i == 28){//操作人id（4byte）-------------------------------------------------------
