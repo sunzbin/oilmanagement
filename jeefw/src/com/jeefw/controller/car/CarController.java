@@ -81,6 +81,17 @@ public class CarController extends JavaEEFrameworkBaseController<CarManagement> 
 		for (int i = 0; i < queryResult.getResultList().size(); i++) {
 			Department department = departmentService.get(Long.valueOf(queryResult.getResultList().get(i).getDepartmentId()));
 			queryResult.getResultList().get(i).setDepartmentId(department.getDepartmentValue());
+			if(queryResult.getResultList().get(i).getCarType().equals("01")) {
+				queryResult.getResultList().get(i).setCarType("SS7C");
+			}else if(queryResult.getResultList().get(i).getCarType().equals("02")) {
+				queryResult.getResultList().get(i).setCarType("SS7E");	
+			}else if(queryResult.getResultList().get(i).getCarType().equals("03")) {
+				queryResult.getResultList().get(i).setCarType("HXD1D");
+			}else if(queryResult.getResultList().get(i).getCarType().equals("04")) {
+				queryResult.getResultList().get(i).setCarType("HXD3D");
+			}else if(queryResult.getResultList().get(i).getCarType().equals("05")) {
+				queryResult.getResultList().get(i).setCarType("HXD3G");
+			}
 		}
 //		JqGridPageView<CarManagement> departmentListView = new JqGridPageView<CarManagement>();
 //		departmentListView.setMaxResults(maxResults);

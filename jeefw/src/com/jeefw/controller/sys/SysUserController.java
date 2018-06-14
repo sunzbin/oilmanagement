@@ -653,5 +653,15 @@ public class SysUserController extends JavaEEFrameworkBaseController<SysUser> im
 	public String carManagement(HttpServletRequest request, HttpServletResponse response) throws IOException {
 		return "back/car/car";
 	}
+	
+	@RequestMapping("/carAxis")
+	public String carAxisPoint(HttpServletRequest request, HttpServletResponse response) throws IOException {
+		return "back/car/carAxis";
+	}
+	
+	@RequestMapping("/axisPoint")
+	public String axisPoint(HttpServletRequest request, HttpServletResponse response) throws IOException {
+		return "back/car/axisPoint";
+	}
 
 }
