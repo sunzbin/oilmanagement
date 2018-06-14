@@ -49,7 +49,7 @@
         			url : "${contextPath}/car/AxisPoint/getCarAxisPoint",
         			datatype : "json",
         			height : 450,
-        			colNames : ['', 'ID', '所属机车', '轴位名称', '轴位代码', '点位名称','点位代码'],
+        			colNames : ['', 'ID', '所属机车', '轴位名称', '轴位代码', '点位名称','点位代码','pid','carid'],
         			colModel : [ {
         				name : '',
         				index : '',
@@ -126,6 +126,16 @@
         				width : 110,
         				editable : true,
         				search : false
+        			},{
+        				name : 'pid',
+        				index : 'pid',
+        				label : 'pid',
+        				hidden:true,
+        			},{
+        				name : 'carId',
+        				index : 'carId',
+        				label : 'carid',
+        				hidden:true
         			}],
         			//scroll : 1, // set the scroll property to 1 to enable paging with scrollbar - virtual loading of records
         			sortname : "id",
