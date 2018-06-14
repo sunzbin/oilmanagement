@@ -200,7 +200,7 @@
         		
         		function getAxis(carid) {
         			var str =''; //用来存放option值
-        			$("select#pid").empty();
+        			$("select#axis_name").empty();
        				$.ajax({
            				type:"post",
            				async:false,
@@ -215,7 +215,7 @@
            				}  
         			}); 
         			//获取下面下拉框对象    
-                    var pointPosition = $("select#pid");       
+                    var pointPosition = $("select#axis_name");       
                     pointPosition.append(str);//渲染option 
                  
                 }  
