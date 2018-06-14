@@ -11,6 +11,7 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.Table;
+import javax.persistence.Transient;
 
 import org.codehaus.jackson.annotate.JsonIgnoreProperties;
 import org.hibernate.annotations.Cache;
@@ -75,6 +76,9 @@ public class CarAxisPoint extends CarAxisPointParameter{
 	 */
 	@Column(name = "point_code")
 	private String  point_code ;
+	
+	@Transient
+	private String carId;
 	
 //	private String  car_type ;
 	
@@ -141,6 +145,8 @@ public class CarAxisPoint extends CarAxisPointParameter{
 //	public void setCar_type(String car_type) {
 //		this.car_type = car_type;
 //	}
+	
+	
 
 	@Override
 	public int hashCode() {
@@ -154,6 +160,14 @@ public class CarAxisPoint extends CarAxisPointParameter{
 		result = prime * result + ((point_code == null) ? 0 : point_code.hashCode());
 		result = prime * result + ((point_name == null) ? 0 : point_name.hashCode());
 		return result;
+	}
+
+	public String getCarId() {
+		return carId;
+	}
+
+	public void setCarId(String carId) {
+		this.carId = carId;
 	}
 
 	@Override
