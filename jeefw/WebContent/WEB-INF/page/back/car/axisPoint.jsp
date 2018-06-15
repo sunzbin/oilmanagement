@@ -81,19 +81,23 @@
         				label : '所属机车',
         				width : 120,
         				editable : true,
+        				editrules: true,
         				edittype : 'select',
-        				editoptions : {value:getCars(),
-        					dataEvents:[{
-	        					type: 'change', //下拉选择的时候
-	        					fn: function (e) {//触发方法
-	       							//获取当前下拉框的id名字（这是点击编辑按钮时才需要的，因为点击编辑按钮后，schoolName的下拉框会变成1_roleid,其中”1“是行号）
-				        			var itemName = this.id;
-				        			var carid = this.value; //获取选中的角色名称
-				        			getAxis(carid); //调用获取角色下对应用户信息data的方法
-	        					}
-						}]},
-        				searchoptions : {sopt : ['eq']},
-        				editrules : {required : true}
+        				editoptions: {  
+                            dataEvents: [//给当前控件追加事件处理  
+                                {  
+                                    type: 'change',                 //下拉选择的时候  
+                                    fn: function (e) {              //触发方法  
+                                        //获取当前下拉框的id名字（这是点击编辑按钮时才需要的，因为点击编辑按钮后，schoolName的下拉框会变成1_schoolName,其中”1“是行号）  
+                                        var itemName = this.id;       
+                                        var selectNum = itemName.match(/^\d+/);//（这是点击编辑按钮时才需要的）将id中的数字获取出来  
+                                        debugger
+                                        var selectName =this.value; //获取选中的名称  
+                                        getAxisClass(selectNum,selectName); //调用获取轴位data的方法  
+                                    }  
+                                }  
+                            ]  
+                        }  
         			}, {
         				name : 'axis_name',
         				index : 'axis_name',
@@ -101,9 +105,7 @@
         				width : 160,
         				editable : true,
         				edittype : 'select',
-        				editoptions : {value:'0:请选择'},
-        				searchoptions : {sopt : ['eq']},
-        				editrules : {required : true}
+        				editoptions: {value: {'0': '请选择轴位'}}  
         			}, {
         				name : 'axis_code',
         				index : 'axis_code',
@@ -152,6 +154,7 @@
         	        multiboxonly : true,
         			loadComplete : function() {
         				var table = this;
+        				getCars();//获取机车
         				setTimeout(function(){
         					styleCheckbox(table);
         					updateActionIcons(table);
@@ -186,50 +189,76 @@
         		}
         		
         		function getCars(){
-        			var cars = '0:请选择;';
         			$.ajax({
         				type:"post",
         				async:false,
         				url:"${contextPath}/car/axis/findCarManagements",
         				success:function(data){  
+        					window.result = data;//拿出学校data  
         					console.info(data);
-        				if (data != null) {  
-        					//debugger;
-        					for(var i=0;i<data.length;i++){
-        						if(i!=data.length-1){
-        							cars += data[i].id+':'+'车型：'+data[i].carType+",车号："+data[i].carNum+';';
-        						}else{
-        							cars += data[i].id+':'+'车型：'+data[i].carType+",车号："+data[i].carNum;
-        						}
-        						
-        					}
-       				     }  
+        					var carName = '0:请选择车辆;';
+	        				if (data != null) {  
+	        					for(var i=0;i<result.length;i++){
+	        						if(i!=result.length-1){
+	        							carName += result[i].id+':'+'车型：'+result[i].carType+",车号："+result[i].carNum+';';
+	        						}else{
+	        							carName += result[i].id+':'+'车型：'+result[i].carType+",车号："+result[i].carNum;
+	        						}
+	        					}
+	        					$(grid_selector).setColProp('ascription_loco', {editoptions: {value: carName}});  
+	       				     }  
         				}  
       				}); 
-					return cars;        			
         		}
         		
-        		function getAxis(carid) {
-        			var str =''; //用来存放option值
-        			$("select#axis_name").empty();
-       				$.ajax({
-           				type:"post",
-           				async:false,
-           				url:"${contextPath}/car/AxisPoint/findAxis?carid="+carid,
-           				success:function(data){
-           					console.info(data);
-	           				if (data != null) {  
-	           					for(var i=0;i<data.length;i++){
-	           						str += '<option value="'+data[i].id+'">'+data[i].axis_name+'</option>';
-	           					}
-	      				     }  
-           				}  
-        			}); 
-        			//获取下面下拉框对象    
-                    var pointPosition = $("select#axis_name");       
-                    pointPosition.append(str);//渲染option 
-                 
-                }  
+        		function getAxisClass(selectNum,selectName){
+        			//debugger
+        			var str = ""; //用来存放option值  
+        	        //将增加操作的弹出菜单中的schoolClassName的下拉框内容清空（因为每次切换内容都需要变更）  
+        	        $("select#axis_name").empty();  
+        	  
+        	        //将修改操作中的1_schoolClassName（1是行号）的下拉框内容清空（因为每次切换内容都需要变更）  
+        	        $("select#" + selectNum+"axis_name").empty();  
+        	        if (selectName === '0') {  
+        	            str += "<option>" + "请选择轴位" + "</option>";  
+        	        } else {  
+        	            var axisId;  
+        	            for (var i = 0; i < result.length; i++) {  
+        	                //通过与本地学校data的匹对，获取学校的id  
+        	                if (selectName.toString() == result[i].id) {  
+        	                	axisId = result[i].id;  
+        	                    //与后台进行操作  
+        	                    $.ajax({  
+        	                        url: '${contextPath}/car/AxisPoint/findAxis',  
+        	                        async: false,  
+        	                        cache: false,  
+        	                        dataType: "json",  
+        	                        data: {  
+        	                        	carid: axisId
+        	                        },  
+        	                        success: function (data) {  
+        	                        	console.info(data);
+        	                        	if (data != null) {  
+        		           					for(var i=0;i<data.length;i++){
+        		           						str += '<option axisid="'+data[i].id+'" value="'+data[i].id+'">'+data[i].axis_name+'</option>';
+        		           					}
+        		      				     }else {  
+        	                                str += "<option>" + "暂无轴位" + "</option>";  
+        	                            }  
+        	                        }  
+        	                    });  
+        	                    break;  
+        	                }  
+        	            }  
+        	        }  
+        	        //获取下面下拉框schoolClassName对象  
+        	        var axis_name = $("select#axis_name");     
+        	        axis_name.append(str);//渲染option  
+        	          
+        	        //获取下面下拉框selectNum_schoolClassName对象  
+        	        var axis_name1 = $("select#" + selectNum+"axis_name");     
+        	        axis_name1.append(str);//渲染option  
+        		}
         		
         		// navButtons
         		jQuery(grid_selector).jqGrid('navGrid', pager_selector, { // navbar options
