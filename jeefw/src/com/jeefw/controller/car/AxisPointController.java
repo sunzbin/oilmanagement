@@ -133,19 +133,18 @@ public class AxisPointController extends JavaEEFrameworkBaseController<CarAxisPo
 		findValue[0] = entity.getPid();
 		findValue[1] = entity.getPoint_name();
 		List<CarAxisPoint> findeResult = carAxisPointAxisService.queryByProerties(findName, findValue);
-		if(findeResult.size()==0) {
-			if (CMD_EDIT.equals(parameter.getCmd())) {
-				carAxisPointAxisService.merge(entity);
-			} else if (CMD_NEW.equals(parameter.getCmd())) {
+		if (CMD_EDIT.equals(parameter.getCmd())) {
+			carAxisPointAxisService.merge(entity);
+		} else if (CMD_NEW.equals(parameter.getCmd())) {
+			if(findeResult.size()==0) {
 				carAxisPointAxisService.persist(entity);
+			}else {
+				parameter.setMessage("该点位已存在");
+				writeJSON(response, parameter);
 			}
-			parameter.setSuccess(true);
-			writeJSON(response, parameter);
-		}else {
-			parameter.setMessage("该点位已存在");
-			writeJSON(response, parameter);
 		}
-
+		parameter.setSuccess(true);
+		writeJSON(response, parameter);
 	}
 
 	// 操作字典的删除、导出Excel、字段判断和保存
