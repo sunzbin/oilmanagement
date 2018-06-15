@@ -116,20 +116,22 @@ public class CarController extends JavaEEFrameworkBaseController<CarManagement> 
 	@RequestMapping(value = "/saveCar", method = { RequestMethod.POST, RequestMethod.GET })
 	public void saveCar(CarManagement entity, HttpServletRequest request, HttpServletResponse response) throws IOException {
 		ExtJSBaseParameter parameter = ((ExtJSBaseParameter) entity);
-		String[] findName = new String [2];
-		findName[0] = "car_type";
-		findName[1] = "car_num";
+		String[] findName = new String [3];
+		findName[0] = "carType";
+		findName[1] = "carNum";
+		findName[2] = "departmentId";
 		Object[] findValue = new Object[2];
 		findValue[0] = entity.getCarType();
 		findValue[1] = entity.getCarNum();
-		List<CarAxisPoint> findeResult = carAxisPointAxisService.queryByProerties(findName, findValue);
+		findValue[2] = entity.getDepartmentId();
+		List<CarManagement> findeResult = carService.queryByProerties(findName, findValue);
 		if (CMD_EDIT.equals(parameter.getCmd())) {
 			carService.merge(entity);
 		} else if (CMD_NEW.equals(parameter.getCmd())) {
 			if(findeResult.size()==0) {
 				carService.persist(entity);
 			}else {
-				parameter.setMessage("该轴位已存在");
+				parameter.setMessage("该机车已存在");
 				writeJSON(response, parameter);
 			}
 		}
