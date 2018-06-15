@@ -48,7 +48,6 @@ import net.sf.json.JSONObject;
 @RequestMapping("/car/axis")
 public class CarAxisPointController extends JavaEEFrameworkBaseController<CarAxisPoint> implements Constant {
 
-
 	@Resource
 	private CarAxisPointService carAxisPointAxisService;
 	
@@ -121,13 +120,25 @@ public class CarAxisPointController extends JavaEEFrameworkBaseController<CarAxi
 	@RequestMapping(value = "/saveCarAxis", method = { RequestMethod.POST, RequestMethod.GET })
 	public void doSave(CarAxisPoint entity, HttpServletRequest request, HttpServletResponse response) throws IOException {
 		ExtJSBaseParameter parameter = ((ExtJSBaseParameter) entity);
-		if (CMD_EDIT.equals(parameter.getCmd())) {
-			carAxisPointAxisService.merge(entity);
-		} else if (CMD_NEW.equals(parameter.getCmd())) {
-			carAxisPointAxisService.persist(entity);
+		String[] findName = new String [2];
+		findName[0] = "ascription_loco";
+		findName[1] = "axis_name";
+		Object[] findValue = new Object[2];
+		findValue[0] = entity.getAscription_loco();
+		findValue[1] = entity.getAxis_name();
+		List<CarAxisPoint> findeResult = carAxisPointAxisService.queryByProerties(findName, findValue);
+		if(findeResult.size()==0) {
+			if (CMD_EDIT.equals(parameter.getCmd())) {
+				carAxisPointAxisService.merge(entity);
+			} else if (CMD_NEW.equals(parameter.getCmd())) {
+				carAxisPointAxisService.persist(entity);
+			}
+			parameter.setSuccess(true);
+			writeJSON(response, parameter);
+		}else {
+			parameter.setMessage("该轴位已存在");
+			writeJSON(response, parameter);
 		}
-		parameter.setSuccess(true);
-		writeJSON(response, parameter);
 	}
 
 	// 操作字典的删除、导出Excel、字段判断和保存
@@ -169,7 +180,19 @@ public class CarAxisPointController extends JavaEEFrameworkBaseController<CarAxi
 	// 删除字典
 	@RequestMapping("/deleteAxis")
 	public void deleteDict(HttpServletRequest request, HttpServletResponse response, @RequestParam("ids") Long[] ids) throws IOException {
-		boolean flag = carAxisPointAxisService.deleteByPK(ids);
+		String idsCheck = "";
+		for (int i = 0; i < ids.length; i++) {
+			List<CarAxisPoint> carAxisPoints = carAxisPointAxisService.queryByProerties("pid", ids[i]);
+			if(carAxisPoints.size()==0) {
+				idsCheck += ids[i]+",";
+			}
+		}
+		String[] delIds = idsCheck.split(",");
+		Long [] lids = new Long[delIds.length];
+		for (int i = 0; i < delIds.length; i++) {
+			lids[i] = Long.valueOf(delIds[i]);
+		}
+		boolean flag = carAxisPointAxisService.deleteByPK(lids);
 		if (flag) {
 			writeJSON(response, "{success:true}");
 		} else {

@@ -3,6 +3,7 @@ package com.jeefw.controller.car;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.net.URLDecoder;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -20,9 +21,11 @@ import org.springframework.web.bind.annotation.RequestParam;
 
 import com.jeefw.core.Constant;
 import com.jeefw.core.JavaEEFrameworkBaseController;
+import com.jeefw.model.carmanagement.CarAxisPoint;
 import com.jeefw.model.carmanagement.CarManagement;
 import com.jeefw.model.equipment.AxisLabel;
 import com.jeefw.model.sys.Department;
+import com.jeefw.service.car.CarAxisPointService;
 import com.jeefw.service.car.CarService;
 import com.jeefw.service.sys.DepartmentService;
 
@@ -44,6 +47,9 @@ public class CarController extends JavaEEFrameworkBaseController<CarManagement> 
 	
 	@Resource
 	private DepartmentService departmentService;
+	
+	@Resource
+	private CarAxisPointService carAxisPointAxisService;
 
 	// 查询部门的表格，包括分页、搜索和排序
 	@RequestMapping(value = "/getCar", method = { RequestMethod.POST, RequestMethod.GET })
@@ -163,7 +169,15 @@ public class CarController extends JavaEEFrameworkBaseController<CarManagement> 
 	// 删除部门
 	@RequestMapping("/deleteCar")
 	public void deleteCar(HttpServletRequest request, HttpServletResponse response, @RequestParam("ids") String[] ids) throws IOException {
-		boolean flag = carService.deleteByPK(ids);
+		String idsCheck = "";
+		for (int i = 0; i < ids.length; i++) {
+			List<CarAxisPoint> carAxisPoints = carAxisPointAxisService.queryByProerties("ascription_loco", ids[i]+"");
+			if(carAxisPoints.size()==0) {
+				idsCheck += ids[i]+",";
+			}
+		}
+		String[] delIds = idsCheck.split(",");
+		boolean flag = carService.deleteByPK(delIds);
 		if (flag) {
 			writeJSON(response, "{success:true}");
 		} else {

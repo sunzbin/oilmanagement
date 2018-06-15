@@ -48,8 +48,6 @@ import net.sf.json.JSONObject;
 @RequestMapping("/car/AxisPoint")
 public class AxisPointController extends JavaEEFrameworkBaseController<CarAxisPoint> implements Constant{
 
-
-
 	@Resource
 	private CarAxisPointService carAxisPointAxisService;
 	
@@ -128,13 +126,26 @@ public class AxisPointController extends JavaEEFrameworkBaseController<CarAxisPo
 	@RequestMapping(value = "/saveCarAxisPoint", method = { RequestMethod.POST, RequestMethod.GET })
 	public void doSave(CarAxisPoint entity, HttpServletRequest request, HttpServletResponse response) throws IOException {
 		ExtJSBaseParameter parameter = ((ExtJSBaseParameter) entity);
-		if (CMD_EDIT.equals(parameter.getCmd())) {
-			carAxisPointAxisService.merge(entity);
-		} else if (CMD_NEW.equals(parameter.getCmd())) {
-			carAxisPointAxisService.persist(entity);
+		String[] findName = new String [2];
+		findName[0] = "pid";
+		findName[1] = "point_name";
+		Object[] findValue = new Object[2];
+		findValue[0] = entity.getPid();
+		findValue[1] = entity.getPoint_name();
+		List<CarAxisPoint> findeResult = carAxisPointAxisService.queryByProerties(findName, findValue);
+		if(findeResult.size()==0) {
+			if (CMD_EDIT.equals(parameter.getCmd())) {
+				carAxisPointAxisService.merge(entity);
+			} else if (CMD_NEW.equals(parameter.getCmd())) {
+				carAxisPointAxisService.persist(entity);
+			}
+			parameter.setSuccess(true);
+			writeJSON(response, parameter);
+		}else {
+			parameter.setMessage("该点位已存在");
+			writeJSON(response, parameter);
 		}
-		parameter.setSuccess(true);
-		writeJSON(response, parameter);
+
 	}
 
 	// 操作字典的删除、导出Excel、字段判断和保存
