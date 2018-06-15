@@ -71,6 +71,7 @@
         				name : 'id',
         				index : 'id',
         				label : 'ID',
+        				hidden:true,
         				width : 60,
         				sorttype : "long",
         				search : false
