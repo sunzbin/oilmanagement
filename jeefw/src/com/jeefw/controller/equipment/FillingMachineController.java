@@ -32,6 +32,7 @@ import com.jeefw.service.sys.DepartmentService;
 import core.support.ExtJSBaseParameter;
 import core.support.JqGridPageView;
 import core.support.QueryResult;
+import core.util.StringUtil;
 import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
 
@@ -96,7 +97,10 @@ public class FillingMachineController extends JavaEEFrameworkBaseController<Fill
 				queryResult.getResultList().get(i).setEquipmentState("停用");
 			}
 			Department department = departmentService.get(Long.valueOf(queryResult.getResultList().get(i).getAffiliatedInstitutions()));
-			queryResult.getResultList().get(i).setAffiliatedInstitutions(department.getDepartmentValue());
+			if(!StringUtil.isEmpty(department)) {
+				queryResult.getResultList().get(i).setAffiliatedInstitutions(department.getDepartmentValue());
+			}
+			
 		}
 		JqGridPageView<FillingMachine> dictListView = new JqGridPageView<FillingMachine>();
 		dictListView.setMaxResults(maxResults);
