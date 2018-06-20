@@ -80,8 +80,8 @@
         				index : 'ascription_loco',
         				label : '所属机车',
         				width : 120,
-        				editable : true,
-        				editrules: true,
+        				editable : false,
+        				editrules: false,
         				edittype : 'select',
         				editoptions: {  
                             dataEvents: [//给当前控件追加事件处理  
@@ -103,7 +103,8 @@
         				index : 'axis_name',
         				label : '轴位名称',
         				width : 160,
-        				editable : true,
+        				editable : false,
+        				editrules: false,
         				edittype : 'select',
         				editoptions: {value: {'0': '请选择轴位'}}  
         			}, {
