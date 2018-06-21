@@ -49,7 +49,7 @@
         			url : "${contextPath}/sys/department/getDepartment",
         			datatype : "json",
         			height : 450,
-        			colNames : ['', 'ID', '部门编码', '部门名称', '上级部门', '部门描述'],
+        			colNames : ['','部门编码', '部门名称', '上级部门', '部门描述'],
         			colModel : [ {
         				name : '',
         				index : '',
@@ -67,13 +67,6 @@
         					}
         					//editformbutton:true, editOptions:{recreateForm:true, beforeShowForm:beforeEditCallback}
         				}
-        			}, {
-        				name : 'id',
-        				index : 'id',
-        				label : 'ID',
-        				width : 60,
-        				sorttype : "long",
-        				search : false
         			}, {
         				name : 'departmentKey',
         				index : 'departmentKey',
