@@ -49,7 +49,7 @@
         			url : "${contextPath}/car/carManager/getCar",
         			datatype : "json",
         			height : 450,
-        			colNames : ['', 'ID', '车型', '车型编号', '车号', '所属部门'],
+        			colNames : ['', 'ID', '车型', '车号', '所属部门'],
         			colModel : [ {
         				name : '',
         				index : '',
@@ -71,6 +71,7 @@
         				name : 'id',
         				index : 'id',
         				label : 'ID',
+        				hidden:true,
         				width : 60,
         				sorttype : "long",
         				search : false
@@ -80,17 +81,9 @@
         				label : '车型',
         				width : 120,
         				editable : true,
-        				editoptions : {size : "20", maxlength : "20"},
+        				edittype : 'select',
+        				editoptions : {value:'01:SS7C;02:SS7E;03:HXD1D;04:HXD3D;05:HXD3G'},
         				searchoptions : {sopt : ['eq']},
-        				editrules : {required : true}
-        			}, {
-        				name : 'carTypeCode',
-        				index : 'carTypeCode',
-        				label : '车型代码',
-        				width : 160,
-        				editable : true,
-        				editoptions : {size : "20", maxlength : "40"},
-        				searchoptions : {sopt : ['cn']},
         				editrules : {required : true}
         			}, {
         				name : 'carNum',
@@ -98,18 +91,19 @@
         				label : '车号',
         				width : 110,
         				editable : true,
-        				editoptions : {size : "20", maxlength : "40"},
+        				editoptions : {size : "20", maxlength : "4"},
         				searchoptions : {sopt : ['cn']},
         				editrules : {required : true}
         			}, {
         				name : 'departmentId',
         				index : 'departmentId',
-        				label : '所属部门',
-        				width : 110,
+        				label : '所属机构',
+        				width : 120,
         				editable : true,
-        				edittype : "select",
-        				editoptions : {dataUrl : "${contextPath}/sys/department/getDepartmentSelectNoSelfList", title : "如果没有上级，不选即可"},
-        				search : false
+        				edittype : 'select',
+        				editoptions : {value:getAffiliatedInstitutions()},
+        				searchoptions : {sopt : ['eq']},
+        				editrules : {required : true}
         			}],
         			//scroll : 1, // set the scroll property to 1 to enable paging with scrollbar - virtual loading of records
         			sortname : "id",
@@ -158,19 +152,44 @@
         			}, 0);
         		}
         		
+        		function getAffiliatedInstitutions(){
+        			var affiliatedInstitutions = '';
+        			$.ajax({
+        				type:"post",
+        				async:false,
+        				url:"${contextPath}/filling/findDepartment",
+        				success:function(data){  
+        					console.info(data);
+        				if (data != null) {  
+        					//debugger;
+        					for(var i=0;i<data.length;i++){
+        						if(i!=data.length-1){
+        							affiliatedInstitutions += data[i].id+':'+data[i].departmentValue+';';
+        						}else{
+        							affiliatedInstitutions += data[i].id+':'+data[i].departmentValue;
+        						}
+        						
+        					}
+       				     }  
+        				}  
+      				}); 
+					return affiliatedInstitutions;        			
+        		}
+        		
+        		
         		// navButtons
         		jQuery(grid_selector).jqGrid('navGrid', pager_selector, { // navbar options
-        			edit : <shiro:hasPermission name="${ROLE_KEY}:department:edit">true</shiro:hasPermission><shiro:lacksPermission name="${ROLE_KEY}:department:edit">false</shiro:lacksPermission>,
+        			edit : <shiro:hasPermission name="${ROLE_KEY}:carmanagement:edit">true</shiro:hasPermission><shiro:lacksPermission name="${ROLE_KEY}:carmanagement:edit">false</shiro:lacksPermission>,
         			editicon : 'ace-icon fa fa-pencil blue',
-        			add : <shiro:hasPermission name="${ROLE_KEY}:department:add">true</shiro:hasPermission><shiro:lacksPermission name="${ROLE_KEY}:department:add">false</shiro:lacksPermission>,
+        			add : <shiro:hasPermission name="${ROLE_KEY}:carmanagement:add">true</shiro:hasPermission><shiro:lacksPermission name="${ROLE_KEY}:carmanagement:add">false</shiro:lacksPermission>,
         			addicon : 'ace-icon fa fa-plus-circle purple',
-        			del : <shiro:hasPermission name="${ROLE_KEY}:department:delete">true</shiro:hasPermission><shiro:lacksPermission name="${ROLE_KEY}:department:delete">false</shiro:lacksPermission>,
+        			del : <shiro:hasPermission name="${ROLE_KEY}:carmanagement:delete">true</shiro:hasPermission><shiro:lacksPermission name="${ROLE_KEY}:carmanagement:delete">false</shiro:lacksPermission>,
         			delicon : 'ace-icon fa fa-trash-o red',
-        			search : <shiro:hasPermission name="${ROLE_KEY}:department:search">true</shiro:hasPermission><shiro:lacksPermission name="${ROLE_KEY}:department:search">false</shiro:lacksPermission>,
+        			search : <shiro:hasPermission name="${ROLE_KEY}:carmanagement:search">true</shiro:hasPermission><shiro:lacksPermission name="${ROLE_KEY}:carmanagement:search">false</shiro:lacksPermission>,
         			searchicon : 'ace-icon fa fa-search orange',
         			refresh : true,
         			refreshicon : 'ace-icon fa fa-refresh blue',
-        			view : <shiro:hasPermission name="${ROLE_KEY}:department:view">true</shiro:hasPermission><shiro:lacksPermission name="${ROLE_KEY}:department:view">false</shiro:lacksPermission>,
+        			view : <shiro:hasPermission name="${ROLE_KEY}:carmanagement:view">true</shiro:hasPermission><shiro:lacksPermission name="${ROLE_KEY}:carmanagement:view">false</shiro:lacksPermission>,
         			viewicon : 'ace-icon fa fa-search-plus grey'
         		}, {
         			// edit record form
@@ -240,7 +259,6 @@
         		})
         		
         		// add custom button to export the data to excel
-        		/**
         		if(<shiro:hasPermission name="${ROLE_KEY}:department:export">true</shiro:hasPermission><shiro:lacksPermission name="${ROLE_KEY}:department:export">false</shiro:lacksPermission>){
     				jQuery(grid_selector).jqGrid('navButtonAdd', pager_selector,{
    					   caption : "",
@@ -271,7 +289,7 @@
    				    	   OpenWindow.document.close();
    				       } 
    					});        			
-        		} */
+        		}
         		
         		function style_edit_form(form) {
         			// form.find('input[name=statusCn]').addClass('ace ace-switch ace-switch-5').after('<span class="lbl"></span>');

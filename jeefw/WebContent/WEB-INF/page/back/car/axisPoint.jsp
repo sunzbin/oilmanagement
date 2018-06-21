@@ -5,7 +5,7 @@
 
 <link rel="stylesheet" href="${contextPath}/static/assets/css/jquery-ui.css" />
 <link rel="stylesheet" href="${contextPath}/static/assets/css/ui.jqgrid.css" />
-<link rel="stylesheet" href="${contextPath}/static/layui/css/layui.css" />
+
 <div class="row">
 	<div class="col-xs-12">
 		<table id="grid-table"></table>
@@ -22,7 +22,7 @@
 
 <!-- page specific plugin scripts -->
 <script type="text/javascript">
-		var scripts = [ "${contextPath}/static/layui/layui.all.js", "${contextPath}/static/assets/js/jqGrid/jquery.jqGrid.js", "${contextPath}/static/assets/js/jqGrid/i18n/grid.locale-cn.js", null ]
+		var scripts = [ null, "${contextPath}/static/assets/js/jqGrid/jquery.jqGrid.js", "${contextPath}/static/assets/js/jqGrid/i18n/grid.locale-cn.js", null ]
         $('.page-content-area').ace_ajax('loadScripts', scripts, function() {
         	// inline scripts related to this page
         	jQuery(function($) {
@@ -46,10 +46,10 @@
 
         		jQuery(grid_selector).jqGrid({
         			subGrid : false,
-        			url : "${contextPath}/labelLogin/getLoginLabelInfo",
+        			url : "${contextPath}/car/AxisPoint/getCarAxisPoint",
         			datatype : "json",
         			height : 450,
-        			colNames : ['', 'ID', '标签类型', '用户id'],
+        			colNames : ['', 'ID', '所属机车', '轴位名称', '轴位代码', '点位名称','点位代码','pid','carid'],
         			colModel : [ {
         				name : '',
         				index : '',
@@ -76,24 +76,70 @@
         				sorttype : "long",
         				search : false
         			}, {
-        				name : 'labelType',
-        				index : 'labelType',
-        				label : '标签类型',
+        				name : 'ascription_loco',
+        				index : 'ascription_loco',
+        				label : '所属机车',
         				width : 120,
-        				editable : true,
+        				editable : false,
+        				editrules: false,
         				edittype : 'select',
-        				editoptions : {value:'11:登录标签'},
-        				searchoptions : {sopt : ['eq']},
-        				editrules : {required : true}
+        				editoptions: {  
+                            dataEvents: [//给当前控件追加事件处理  
+                                {  
+                                    type: 'change',                 //下拉选择的时候  
+                                    fn: function (e) {              //触发方法  
+                                        //获取当前下拉框的id名字（这是点击编辑按钮时才需要的，因为点击编辑按钮后，schoolName的下拉框会变成1_schoolName,其中”1“是行号）  
+                                        var itemName = this.id;       
+                                        var selectNum = itemName.match(/^\d+/);//（这是点击编辑按钮时才需要的）将id中的数字获取出来  
+                                        debugger
+                                        var selectName =this.value; //获取选中的名称  
+                                        getAxisClass(selectNum,selectName); //调用获取轴位data的方法  
+                                    }  
+                                }  
+                            ]  
+                        }  
         			}, {
-        				name : 'userId',
-        				index : 'userId',
-        				label : '用户id',
+        				name : 'axis_name',
+        				index : 'axis_name',
+        				label : '轴位名称',
         				width : 160,
+        				editable : false,
+        				editrules: false,
+        				edittype : 'select',
+        				editoptions: {value: {'0': '请选择轴位'}}  
+        			}, {
+        				name : 'axis_code',
+        				index : 'axis_code',
+        				label : '轴位代码',
+        				width : 100,
+        				editable : false,
+        				sorttype : "long",
+        				search : false,
+        				editrules : {number : true}
+        			}, {
+        				name : 'point_name',
+        				index : 'point_name',
+        				label : '点位名称',
+        				width : 110,
         				editable : true,
-        				editoptions : {size : "20", maxlength : "40"},
-        				searchoptions : {sopt : ['cn']},
-        				editrules : {required : true}
+        				search : false
+        			} ,{
+        				name : 'point_code',
+        				index : 'point_code',
+        				label : '点位代码',
+        				width : 110,
+        				editable : true,
+        				search : false
+        			},{
+        				name : 'pid',
+        				index : 'pid',
+        				label : 'pid',
+        				hidden:true,
+        			},{
+        				name : 'carId',
+        				index : 'carId',
+        				label : 'carid',
+        				hidden:true
         			}],
         			//scroll : 1, // set the scroll property to 1 to enable paging with scrollbar - virtual loading of records
         			sortname : "id",
@@ -109,6 +155,7 @@
         	        multiboxonly : true,
         			loadComplete : function() {
         				var table = this;
+        				getCars();//获取机车
         				setTimeout(function(){
         					styleCheckbox(table);
         					updateActionIcons(table);
@@ -116,7 +163,7 @@
         					enableTooltips(table);
         				}, 0);
         			},
-        			editurl : "${contextPath}/labelLogin/operateLabelLogin"
+        			editurl : "${contextPath}/car/AxisPoint/operateCarAxisPoint"
         			//caption : "用户管理列表",
         			//autowidth : true,
         			/**
@@ -142,19 +189,91 @@
         			}, 0);
         		}
         		
+        		function getCars(){
+        			$.ajax({
+        				type:"post",
+        				async:false,
+        				url:"${contextPath}/car/axis/findCarManagements",
+        				success:function(data){  
+        					window.result = data;//拿出学校data  
+        					console.info(data);
+        					var carName = '0:请选择车辆;';
+	        				if (data != null) {  
+	        					for(var i=0;i<result.length;i++){
+	        						if(i!=result.length-1){
+	        							carName += result[i].id+':'+'车型：'+result[i].carType+",车号："+result[i].carNum+';';
+	        						}else{
+	        							carName += result[i].id+':'+'车型：'+result[i].carType+",车号："+result[i].carNum;
+	        						}
+	        					}
+	        					$(grid_selector).setColProp('ascription_loco', {editoptions: {value: carName}});  
+	       				     }  
+        				}  
+      				}); 
+        		}
+        		
+        		function getAxisClass(selectNum,selectName){
+        			//debugger
+        			var str = ""; //用来存放option值  
+        	        //将增加操作的弹出菜单中的schoolClassName的下拉框内容清空（因为每次切换内容都需要变更）  
+        	        $("select#axis_name").empty();  
+        	  
+        	        //将修改操作中的1_schoolClassName（1是行号）的下拉框内容清空（因为每次切换内容都需要变更）  
+        	        $("select#" + selectNum+"axis_name").empty();  
+        	        if (selectName === '0') {  
+        	            str += "<option>" + "请选择轴位" + "</option>";  
+        	        } else {  
+        	            var axisId;  
+        	            for (var i = 0; i < result.length; i++) {  
+        	                //通过与本地学校data的匹对，获取学校的id  
+        	                if (selectName.toString() == result[i].id) {  
+        	                	axisId = result[i].id;  
+        	                    //与后台进行操作  
+        	                    $.ajax({  
+        	                        url: '${contextPath}/car/AxisPoint/findAxis',  
+        	                        async: false,  
+        	                        cache: false,  
+        	                        dataType: "json",  
+        	                        data: {  
+        	                        	carid: axisId
+        	                        },  
+        	                        success: function (data) {  
+        	                        	console.info(data);
+        	                        	if (data != null) {  
+        		           					for(var i=0;i<data.length;i++){
+        		           						str += '<option axisid="'+data[i].id+'" value="'+data[i].id+'">'+data[i].axis_name+'</option>';
+        		           					}
+        		      				     }else {  
+        	                                str += "<option>" + "暂无轴位" + "</option>";  
+        	                            }  
+        	                        }  
+        	                    });  
+        	                    break;  
+        	                }  
+        	            }  
+        	        }  
+        	        //获取下面下拉框schoolClassName对象  
+        	        var axis_name = $("select#axis_name");     
+        	        axis_name.append(str);//渲染option  
+        	          
+        	        //获取下面下拉框selectNum_schoolClassName对象  
+        	        var axis_name1 = $("select#" + selectNum+"axis_name");     
+        	        axis_name1.append(str);//渲染option  
+        		}
+        		
         		// navButtons
-        		var jqnav = jQuery(grid_selector).jqGrid('navGrid', pager_selector, { // navbar options
-        			edit : <shiro:hasPermission name="${ROLE_KEY}:axislabel:edit">true</shiro:hasPermission><shiro:lacksPermission name="${ROLE_KEY}:axislabel:edit">false</shiro:lacksPermission>,
+        		jQuery(grid_selector).jqGrid('navGrid', pager_selector, { // navbar options
+        			edit : <shiro:hasPermission name="${ROLE_KEY}:axispoint:edit">true</shiro:hasPermission><shiro:lacksPermission name="${ROLE_KEY}:axispoint:edit">false</shiro:lacksPermission>,
         			editicon : 'ace-icon fa fa-pencil blue',
-        			add : <shiro:hasPermission name="${ROLE_KEY}:axislabel:add">true</shiro:hasPermission><shiro:lacksPermission name="${ROLE_KEY}:axislabel:add">false</shiro:lacksPermission>,
+        			add : <shiro:hasPermission name="${ROLE_KEY}:axispoint:add">true</shiro:hasPermission><shiro:lacksPermission name="${ROLE_KEY}:axispoint:add">false</shiro:lacksPermission>,
         			addicon : 'ace-icon fa fa-plus-circle purple',
-        			del : <shiro:hasPermission name="${ROLE_KEY}:axislabel:delete">true</shiro:hasPermission><shiro:lacksPermission name="${ROLE_KEY}:axislabel:delete">false</shiro:lacksPermission>,
+        			del : <shiro:hasPermission name="${ROLE_KEY}:axispoint:delete">true</shiro:hasPermission><shiro:lacksPermission name="${ROLE_KEY}:axispoint:delete">false</shiro:lacksPermission>,
         			delicon : 'ace-icon fa fa-trash-o red',
-        			search : <shiro:hasPermission name="${ROLE_KEY}:axislabel:search">true</shiro:hasPermission><shiro:lacksPermission name="${ROLE_KEY}:axislabel:search">false</shiro:lacksPermission>,
+        			search : <shiro:hasPermission name="${ROLE_KEY}:axispoint:search">true</shiro:hasPermission><shiro:lacksPermission name="${ROLE_KEY}:axispoint:search">false</shiro:lacksPermission>,
         			searchicon : 'ace-icon fa fa-search orange',
         			refresh : true,
         			refreshicon : 'ace-icon fa fa-refresh blue',
-        			view : <shiro:hasPermission name="${ROLE_KEY}:axislabel:view">true</shiro:hasPermission><shiro:lacksPermission name="${ROLE_KEY}:axislabel:view">false</shiro:lacksPermission>,
+        			view : <shiro:hasPermission name="${ROLE_KEY}:axispoint:view">true</shiro:hasPermission><shiro:lacksPermission name="${ROLE_KEY}:axispoint:view">false</shiro:lacksPermission>,
         			viewicon : 'ace-icon fa fa-search-plus grey'
         		}, {
         			// edit record form
@@ -223,29 +342,8 @@
         			}
         		})
         		
-        		jqnav.navButtonAdd(pager_selector, {
-                caption: "上传",
-                title:"上传",
-                buttonicon: "ace-icon fa fa-globe blue",
-                onClickButton: null,
-                position: "last",
-                id:"upload"
-            })
-            
-            $('#upload').click(function(){
-            	layer.open({
-                    type: 2,
-                    shadeClose: false, //点击遮罩关闭层
-                    area: ['690px', '640px'],
-                    content: '${contextPath}/labelLogin/read',
-                    end: function () {
-                        location.reload(); //点击后刷新父页面
-                    }
-                });
-            }); 
-        		
         		// add custom button to export the data to excel
-        		if(<shiro:hasPermission name="${ROLE_KEY}:dict:export">true</shiro:hasPermission><shiro:lacksPermission name="${ROLE_KEY}:dict:export">false</shiro:lacksPermission>){
+        		if(<shiro:hasPermission name="${ROLE_KEY}:axispoint:export">true</shiro:hasPermission><shiro:lacksPermission name="${ROLE_KEY}:axispoint:export">false</shiro:lacksPermission>){
     				jQuery(grid_selector).jqGrid('navButtonAdd', pager_selector,{
    					   caption : "",
    				       title : "导出Excel",
@@ -267,7 +365,7 @@
    				    	   	   rows = rows + "\n"; // output each row with end of line
    				    	   }
    				    	   rows = rows + "\n"; // end of line at the end
-   				    	   var form = "<form name='csvexportform' action='${contextPath}/sys/dict/operateDict?oper=excel' method='post'>";
+   				    	   var form = "<form name='csvexportform' action='${contextPath}/car/AxisPoint/operateCarAxisPoint?oper=excel' method='post'>";
    				    	   form = form + "<input type='hidden' name='csvBuffer' value='" + encodeURIComponent(rows) + "'>";
    				    	   form = form + "</form><script>document.csvexportform.submit();</sc" + "ript>";
    				    	   OpenWindow = window.open('', '');

@@ -3,6 +3,7 @@ package com.jeefw.controller.car;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.net.URLDecoder;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -20,9 +21,13 @@ import org.springframework.web.bind.annotation.RequestParam;
 
 import com.jeefw.core.Constant;
 import com.jeefw.core.JavaEEFrameworkBaseController;
+import com.jeefw.model.carmanagement.CarAxisPoint;
 import com.jeefw.model.carmanagement.CarManagement;
+import com.jeefw.model.equipment.AxisLabel;
 import com.jeefw.model.sys.Department;
+import com.jeefw.service.car.CarAxisPointService;
 import com.jeefw.service.car.CarService;
+import com.jeefw.service.sys.DepartmentService;
 
 import core.support.ExtJSBaseParameter;
 import core.support.JqGridPageView;
@@ -39,6 +44,12 @@ public class CarController extends JavaEEFrameworkBaseController<CarManagement> 
 
 	@Resource
 	private CarService carService;
+	
+	@Resource
+	private DepartmentService departmentService;
+	
+	@Resource
+	private CarAxisPointService carAxisPointAxisService;
 
 	// 查询部门的表格，包括分页、搜索和排序
 	@RequestMapping(value = "/getCar", method = { RequestMethod.POST, RequestMethod.GET })
@@ -73,12 +84,31 @@ public class CarController extends JavaEEFrameworkBaseController<CarManagement> 
 		sortedCondition.put(sortedObject, sortedValue);
 		car.setSortedConditions(sortedCondition);
 		QueryResult<CarManagement> queryResult = carService.doPaginationQuery(car);
-		JqGridPageView<CarManagement> departmentListView = new JqGridPageView<CarManagement>();
-		departmentListView.setMaxResults(maxResults);
-		List<CarManagement> departmentCnList = carService.queryDepartmentCnList(queryResult.getResultList());
-		departmentListView.setRows(departmentCnList);
-		departmentListView.setRecords(queryResult.getTotalCount());
-		writeJSON(response, departmentListView);
+		for (int i = 0; i < queryResult.getResultList().size(); i++) {
+			Department department = departmentService.get(Long.valueOf(queryResult.getResultList().get(i).getDepartmentId()));
+			queryResult.getResultList().get(i).setDepartmentId(department.getDepartmentValue());
+			if(queryResult.getResultList().get(i).getCarType().equals("01")) {
+				queryResult.getResultList().get(i).setCarType("SS7C");
+			}else if(queryResult.getResultList().get(i).getCarType().equals("02")) {
+				queryResult.getResultList().get(i).setCarType("SS7E");	
+			}else if(queryResult.getResultList().get(i).getCarType().equals("03")) {
+				queryResult.getResultList().get(i).setCarType("HXD1D");
+			}else if(queryResult.getResultList().get(i).getCarType().equals("04")) {
+				queryResult.getResultList().get(i).setCarType("HXD3D");
+			}else if(queryResult.getResultList().get(i).getCarType().equals("05")) {
+				queryResult.getResultList().get(i).setCarType("HXD3G");
+			}
+		}
+//		JqGridPageView<CarManagement> departmentListView = new JqGridPageView<CarManagement>();
+//		departmentListView.setMaxResults(maxResults);
+//		List<CarManagement> departmentCnList = carService.queryDepartmentCnList(queryResult.getResultList());
+//		departmentListView.setRows(departmentCnList);
+//		departmentListView.setRecords(queryResult.getTotalCount());
+		JqGridPageView<CarManagement> carManagementListView = new JqGridPageView<CarManagement>();
+		carManagementListView.setMaxResults(maxResults);
+		carManagementListView.setRows(queryResult.getResultList());
+		carManagementListView.setRecords(queryResult.getTotalCount());
+		writeJSON(response, carManagementListView);
 	}
 
 	// 保存部门的实体Bean
@@ -86,10 +116,24 @@ public class CarController extends JavaEEFrameworkBaseController<CarManagement> 
 	@RequestMapping(value = "/saveCar", method = { RequestMethod.POST, RequestMethod.GET })
 	public void saveCar(CarManagement entity, HttpServletRequest request, HttpServletResponse response) throws IOException {
 		ExtJSBaseParameter parameter = ((ExtJSBaseParameter) entity);
+		String[] findName = new String [3];
+		findName[0] = "carType";
+		findName[1] = "carNum";
+		findName[2] = "departmentId";
+		Object[] findValue = new Object[2];
+		findValue[0] = entity.getCarType();
+		findValue[1] = entity.getCarNum();
+		findValue[2] = entity.getDepartmentId();
+		List<CarManagement> findeResult = carService.queryByProerties(findName, findValue);
 		if (CMD_EDIT.equals(parameter.getCmd())) {
 			carService.merge(entity);
 		} else if (CMD_NEW.equals(parameter.getCmd())) {
-			carService.persist(entity);
+			if(findeResult.size()==0) {
+				carService.persist(entity);
+			}else {
+				parameter.setMessage("该机车已存在");
+				writeJSON(response, parameter);
+			}
 		}
 		parameter.setSuccess(true);
 		writeJSON(response, parameter);
@@ -120,36 +164,34 @@ public class CarController extends JavaEEFrameworkBaseController<CarManagement> 
 			String carTypeCode = request.getParameter("carTypeCode");
 			String carNum = request.getParameter("carNum");
 			String departmentId = request.getParameter("departmentId");
-			CarManagement department = null;
+			CarManagement entity = new CarManagement();
+			entity.setCarNum(carNum);
+			entity.setCarType(carType);
+			entity.setCarTypeCode(carTypeCode);
+			entity.setDepartmentId(departmentId);
 			if (oper.equals("edit")) {
-				department = carService.get(Long.valueOf(id));
-			}
-			CarManagement departmentKeyDepartment = carService.getByProerties("carType", carType);
-			CarManagement parentDepartmentkeyDepartment = carService.getByProerties("carTypeCode", carTypeCode);
-				CarManagement entity = new CarManagement();
-				entity.setCarNum(carNum);
-				entity.setCarType(carType);
-				entity.setCarTypeCode(carTypeCode);
-				entity.setDepartmentId(departmentId);
-//				entity.setDepartmentKey(departmentKey);
-//				entity.setDepartmentValue(departmentValue);
-//				entity.setParentDepartmentkey(parentDepartmentkey);
-//				entity.setDescription(description);
-				if (oper.equals("edit")) {
-					entity.setId(id);
-					entity.setCmd("edit");
-					saveCar(entity, request, response);
-				} else if (oper.equals("add")) {
-					entity.setCmd("new");
-					saveCar(entity, request, response);
-			}
+				entity.setId(id);
+				entity.setCmd("edit");
+				saveCar(entity, request, response);
+			} else if (oper.equals("add")) {
+				entity.setCmd("new");
+				saveCar(entity, request, response);
+		}
 		}
 	}
 
 	// 删除部门
 	@RequestMapping("/deleteCar")
 	public void deleteCar(HttpServletRequest request, HttpServletResponse response, @RequestParam("ids") String[] ids) throws IOException {
-		boolean flag = carService.deleteByPK(ids);
+		String idsCheck = "";
+		for (int i = 0; i < ids.length; i++) {
+			List<CarAxisPoint> carAxisPoints = carAxisPointAxisService.queryByProerties("ascription_loco", ids[i]+"");
+			if(carAxisPoints.size()==0) {
+				idsCheck += ids[i]+",";
+			}
+		}
+		String[] delIds = idsCheck.split(",");
+		boolean flag = carService.deleteByPK(delIds);
 		if (flag) {
 			writeJSON(response, "{success:true}");
 		} else {

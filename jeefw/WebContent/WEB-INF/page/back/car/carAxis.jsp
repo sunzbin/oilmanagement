@@ -5,7 +5,7 @@
 
 <link rel="stylesheet" href="${contextPath}/static/assets/css/jquery-ui.css" />
 <link rel="stylesheet" href="${contextPath}/static/assets/css/ui.jqgrid.css" />
-<link rel="stylesheet" href="${contextPath}/static/layui/css/layui.css" />
+
 <div class="row">
 	<div class="col-xs-12">
 		<table id="grid-table"></table>
@@ -22,7 +22,7 @@
 
 <!-- page specific plugin scripts -->
 <script type="text/javascript">
-		var scripts = [ "${contextPath}/static/layui/layui.all.js", "${contextPath}/static/assets/js/jqGrid/jquery.jqGrid.js", "${contextPath}/static/assets/js/jqGrid/i18n/grid.locale-cn.js", null ]
+		var scripts = [ null, "${contextPath}/static/assets/js/jqGrid/jquery.jqGrid.js", "${contextPath}/static/assets/js/jqGrid/i18n/grid.locale-cn.js", null ]
         $('.page-content-area').ace_ajax('loadScripts', scripts, function() {
         	// inline scripts related to this page
         	jQuery(function($) {
@@ -46,10 +46,10 @@
 
         		jQuery(grid_selector).jqGrid({
         			subGrid : false,
-        			url : "${contextPath}/labelLogin/getLoginLabelInfo",
+        			url : "${contextPath}/car/axis/getCarAxis",
         			datatype : "json",
         			height : 450,
-        			colNames : ['', 'ID', '标签类型', '用户id'],
+        			colNames : ['', 'ID', '所属机车', '轴位名称', '轴位代码'],
         			colModel : [ {
         				name : '',
         				index : '',
@@ -76,24 +76,33 @@
         				sorttype : "long",
         				search : false
         			}, {
-        				name : 'labelType',
-        				index : 'labelType',
-        				label : '标签类型',
+        				name : 'ascription_loco',
+        				index : 'ascription_loco',
+        				label : '机车号',
         				width : 120,
         				editable : true,
         				edittype : 'select',
-        				editoptions : {value:'11:登录标签'},
+        				editoptions : {value:getCars()},
         				searchoptions : {sopt : ['eq']},
         				editrules : {required : true}
         			}, {
-        				name : 'userId',
-        				index : 'userId',
-        				label : '用户id',
+        				name : 'axis_name',
+        				index : 'axis_name',
+        				label : '轴位名称',
         				width : 160,
         				editable : true,
         				editoptions : {size : "20", maxlength : "40"},
         				searchoptions : {sopt : ['cn']},
         				editrules : {required : true}
+        			}, {
+        				name : 'axis_code',
+        				index : 'axis_code',
+        				label : '轴位代码',
+        				width : 100,
+        				editable : true,
+        				sorttype : "long",
+        				search : false,
+        				editrules : {number : true}
         			}],
         			//scroll : 1, // set the scroll property to 1 to enable paging with scrollbar - virtual loading of records
         			sortname : "id",
@@ -116,7 +125,7 @@
         					enableTooltips(table);
         				}, 0);
         			},
-        			editurl : "${contextPath}/labelLogin/operateLabelLogin"
+        			editurl : "${contextPath}/car/axis/operateCarAxis"
         			//caption : "用户管理列表",
         			//autowidth : true,
         			/**
@@ -142,19 +151,43 @@
         			}, 0);
         		}
         		
+        		function getCars(){
+        			var cars = '';
+        			$.ajax({
+        				type:"post",
+        				async:false,
+        				url:"${contextPath}/car/axis/findCarManagements",
+        				success:function(data){  
+        					console.info(data);
+        				if (data != null) {  
+        					//debugger;
+        					for(var i=0;i<data.length;i++){
+        						if(i!=data.length-1){
+        							cars += data[i].id+':'+'车型：'+data[i].carType+",车号："+data[i].carNum+';';
+        						}else{
+        							cars += data[i].id+':'+'车型：'+data[i].carType+",车号："+data[i].carNum;
+        						}
+        						
+        					}
+       				     }  
+        				}  
+      				}); 
+					return cars;        			
+        		}
+        		
         		// navButtons
-        		var jqnav = jQuery(grid_selector).jqGrid('navGrid', pager_selector, { // navbar options
-        			edit : <shiro:hasPermission name="${ROLE_KEY}:axislabel:edit">true</shiro:hasPermission><shiro:lacksPermission name="${ROLE_KEY}:axislabel:edit">false</shiro:lacksPermission>,
+        		jQuery(grid_selector).jqGrid('navGrid', pager_selector, { // navbar options
+        			edit : <shiro:hasPermission name="${ROLE_KEY}:caraxis:edit">true</shiro:hasPermission><shiro:lacksPermission name="${ROLE_KEY}:caraxis:edit">false</shiro:lacksPermission>,
         			editicon : 'ace-icon fa fa-pencil blue',
-        			add : <shiro:hasPermission name="${ROLE_KEY}:axislabel:add">true</shiro:hasPermission><shiro:lacksPermission name="${ROLE_KEY}:axislabel:add">false</shiro:lacksPermission>,
+        			add : <shiro:hasPermission name="${ROLE_KEY}:caraxis:add">true</shiro:hasPermission><shiro:lacksPermission name="${ROLE_KEY}:caraxis:add">false</shiro:lacksPermission>,
         			addicon : 'ace-icon fa fa-plus-circle purple',
-        			del : <shiro:hasPermission name="${ROLE_KEY}:axislabel:delete">true</shiro:hasPermission><shiro:lacksPermission name="${ROLE_KEY}:axislabel:delete">false</shiro:lacksPermission>,
+        			del : <shiro:hasPermission name="${ROLE_KEY}:caraxis:delete">true</shiro:hasPermission><shiro:lacksPermission name="${ROLE_KEY}:caraxis:delete">false</shiro:lacksPermission>,
         			delicon : 'ace-icon fa fa-trash-o red',
-        			search : <shiro:hasPermission name="${ROLE_KEY}:axislabel:search">true</shiro:hasPermission><shiro:lacksPermission name="${ROLE_KEY}:axislabel:search">false</shiro:lacksPermission>,
+        			search : <shiro:hasPermission name="${ROLE_KEY}:caraxis:search">true</shiro:hasPermission><shiro:lacksPermission name="${ROLE_KEY}:caraxis:search">false</shiro:lacksPermission>,
         			searchicon : 'ace-icon fa fa-search orange',
         			refresh : true,
         			refreshicon : 'ace-icon fa fa-refresh blue',
-        			view : <shiro:hasPermission name="${ROLE_KEY}:axislabel:view">true</shiro:hasPermission><shiro:lacksPermission name="${ROLE_KEY}:axislabel:view">false</shiro:lacksPermission>,
+        			view : <shiro:hasPermission name="${ROLE_KEY}:caraxis:view">true</shiro:hasPermission><shiro:lacksPermission name="${ROLE_KEY}:caraxis:view">false</shiro:lacksPermission>,
         			viewicon : 'ace-icon fa fa-search-plus grey'
         		}, {
         			// edit record form
@@ -223,29 +256,8 @@
         			}
         		})
         		
-        		jqnav.navButtonAdd(pager_selector, {
-                caption: "上传",
-                title:"上传",
-                buttonicon: "ace-icon fa fa-globe blue",
-                onClickButton: null,
-                position: "last",
-                id:"upload"
-            })
-            
-            $('#upload').click(function(){
-            	layer.open({
-                    type: 2,
-                    shadeClose: false, //点击遮罩关闭层
-                    area: ['690px', '640px'],
-                    content: '${contextPath}/labelLogin/read',
-                    end: function () {
-                        location.reload(); //点击后刷新父页面
-                    }
-                });
-            }); 
-        		
         		// add custom button to export the data to excel
-        		if(<shiro:hasPermission name="${ROLE_KEY}:dict:export">true</shiro:hasPermission><shiro:lacksPermission name="${ROLE_KEY}:dict:export">false</shiro:lacksPermission>){
+        		if(<shiro:hasPermission name="${ROLE_KEY}:caraxispoint:export">true</shiro:hasPermission><shiro:lacksPermission name="${ROLE_KEY}:caraxispoint:export">false</shiro:lacksPermission>){
     				jQuery(grid_selector).jqGrid('navButtonAdd', pager_selector,{
    					   caption : "",
    				       title : "导出Excel",
@@ -267,7 +279,7 @@
    				    	   	   rows = rows + "\n"; // output each row with end of line
    				    	   }
    				    	   rows = rows + "\n"; // end of line at the end
-   				    	   var form = "<form name='csvexportform' action='${contextPath}/sys/dict/operateDict?oper=excel' method='post'>";
+   				    	   var form = "<form name='csvexportform' action='${contextPath}/car/carAxisPoint/operateCarAxisPoint?oper=excel' method='post'>";
    				    	   form = form + "<input type='hidden' name='csvBuffer' value='" + encodeURIComponent(rows) + "'>";
    				    	   form = form + "</form><script>document.csvexportform.submit();</sc" + "ript>";
    				    	   OpenWindow = window.open('', '');

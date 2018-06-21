@@ -20,7 +20,11 @@ import org.springframework.web.bind.annotation.RequestParam;
 
 import com.jeefw.core.Constant;
 import com.jeefw.core.JavaEEFrameworkBaseController;
+import com.jeefw.model.carmanagement.CarAxisPoint;
+import com.jeefw.model.equipment.FillingMachine;
 import com.jeefw.model.sys.Department;
+import com.jeefw.service.car.CarAxisPointService;
+import com.jeefw.service.equipment.FillingMachineService;
 import com.jeefw.service.sys.DepartmentService;
 
 import core.support.ExtJSBaseParameter;
@@ -39,6 +43,9 @@ public class DepartmentController extends JavaEEFrameworkBaseController<Departme
 
 	@Resource
 	private DepartmentService departmentService;
+	
+	@Resource
+	private FillingMachineService fillingMachineService;
 
 	// 查询部门的表格，包括分页、搜索和排序
 	@RequestMapping(value = "/getDepartment", method = { RequestMethod.POST, RequestMethod.GET })
@@ -167,7 +174,19 @@ public class DepartmentController extends JavaEEFrameworkBaseController<Departme
 	// 删除部门
 	@RequestMapping("/deleteDepartment")
 	public void deleteDepartment(HttpServletRequest request, HttpServletResponse response, @RequestParam("ids") Long[] ids) throws IOException {
-		boolean flag = departmentService.deleteByPK(ids);
+		String idsCheck = "";
+		for (int i = 0; i < ids.length; i++) {
+			List<FillingMachine> fillingMachines  = fillingMachineService.queryByProerties("affiliated_institutions", ids[i]);
+			if(fillingMachines.size()==0) {
+				idsCheck += ids[i]+",";
+			}
+		}
+		String[] delIds = idsCheck.split(",");
+		Long [] lids = new Long[delIds.length];
+		for (int i = 0; i < delIds.length; i++) {
+			lids[i] = Long.valueOf(delIds[i]);
+		}
+		boolean flag = departmentService.deleteByPK(lids);
 		if (flag) {
 			writeJSON(response, "{success:true}");
 		} else {
