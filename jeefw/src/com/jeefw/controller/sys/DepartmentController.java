@@ -3,6 +3,7 @@ package com.jeefw.controller.sys;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.net.URLDecoder;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -13,6 +14,9 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.beanutils.ConvertUtils;
 import org.apache.commons.lang.StringUtils;
+import org.apache.shiro.SecurityUtils;
+import org.apache.shiro.session.Session;
+import org.apache.shiro.subject.Subject;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -20,16 +24,14 @@ import org.springframework.web.bind.annotation.RequestParam;
 
 import com.jeefw.core.Constant;
 import com.jeefw.core.JavaEEFrameworkBaseController;
-import com.jeefw.model.carmanagement.CarAxisPoint;
 import com.jeefw.model.equipment.FillingMachine;
 import com.jeefw.model.sys.Department;
-import com.jeefw.service.car.CarAxisPointService;
 import com.jeefw.service.equipment.FillingMachineService;
 import com.jeefw.service.sys.DepartmentService;
 
 import core.support.ExtJSBaseParameter;
 import core.support.JqGridPageView;
-import core.support.QueryResult;
+import core.support.PageBaseParameter;
 import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
 
@@ -56,35 +58,88 @@ public class DepartmentController extends JavaEEFrameworkBaseController<Departme
 		String sortedValue = request.getParameter("sord");
 		String filters = request.getParameter("filters");
 		Department department = new Department();
+		//--------------------------------------获取登录人员部门信息及下属部门信息-----------------------------------------
+//		Subject subject = SecurityUtils.getSubject();
+//		Session session = subject.getSession();
+//		String departStr = (String)session.getAttribute("SESSION_DEPARTMENT_PARAM");
+//		String[] departStrs = departStr.split(",");
+//		for (int i = 0; i < departStrs.length-1; i++) {
+//			department.set$eq_departmentKey(departStrs[i]);
+//			if(i == departStrs.length-1){
+//				if(StringUtils.isNotBlank(filters)){
+//					department.setFlag("OR");
+//				}
+//			}else{
+//				department.setFlag("OR");
+//			}
+//		}
+		//-----------------------------------------------------------------------------------------------------------------
+//		if (StringUtils.isNotBlank(filters)) {
+//			JSONObject jsonObject = JSONObject.fromObject(filters);
+//			JSONArray jsonArray = (JSONArray) jsonObject.get("rules");
+//			for (int i = 0; i < jsonArray.size(); i++) {
+//				JSONObject result = (JSONObject) jsonArray.get(i);
+//				if (result.getString("field").equals("departmentKey") && result.getString("op").equals("eq")) {
+//					department.set$eq_departmentKey(result.getString("data"));
+//				}
+//				if (result.getString("field").equals("departmentValue") && result.getString("op").equals("cn")) {
+//					department.set$like_departmentValue(result.getString("data"));
+//				}
+//			}
+//			if (((String) jsonObject.get("groupOp")).equalsIgnoreCase("OR")) {
+//				department.setFlag("OR");
+//			} else {
+//				department.setFlag("AND");
+//			}
+//		}
+//		department.setFirstResult((firstResult - 1) * maxResults);
+//		department.setMaxResults(maxResults);
+//		Map<String, String> sortedCondition = new HashMap<String, String>();
+//		sortedCondition.put(sortedObject, sortedValue);
+//		department.setSortedConditions(sortedCondition);
+//		QueryResult<Department> queryResult = departmentService.doPaginationQuery(department);
+		PageBaseParameter<Department> param = new PageBaseParameter<Department>();
+		
+		//-------------------------------添加查询条件-----------------------------------
+		List<Department> departmentList = new ArrayList<Department>();
 		if (StringUtils.isNotBlank(filters)) {
-			JSONObject jsonObject = JSONObject.fromObject(filters);
-			JSONArray jsonArray = (JSONArray) jsonObject.get("rules");
-			for (int i = 0; i < jsonArray.size(); i++) {
-				JSONObject result = (JSONObject) jsonArray.get(i);
-				if (result.getString("field").equals("departmentKey") && result.getString("op").equals("eq")) {
-					department.set$eq_departmentKey(result.getString("data"));
-				}
-				if (result.getString("field").equals("departmentValue") && result.getString("op").equals("cn")) {
-					department.set$like_departmentValue(result.getString("data"));
-				}
+		JSONObject jsonObject = JSONObject.fromObject(filters);
+		JSONArray jsonArray = (JSONArray) jsonObject.get("rules");
+		for (int i = 0; i < jsonArray.size(); i++) {
+			JSONObject result = (JSONObject) jsonArray.get(i);
+			if (result.getString("field").equals("departmentKey") && result.getString("op").equals("eq")) {
+				department.set$eq_departmentKey(result.getString("data"));
+			}
+			if (result.getString("field").equals("departmentValue") && result.getString("op").equals("cn")) {
+				department.set$like_departmentValue(result.getString("data"));
 			}
 			if (((String) jsonObject.get("groupOp")).equalsIgnoreCase("OR")) {
 				department.setFlag("OR");
 			} else {
 				department.setFlag("AND");
 			}
+			departmentList.add(department);
 		}
-		department.setFirstResult((firstResult - 1) * maxResults);
-		department.setMaxResults(maxResults);
-		Map<String, String> sortedCondition = new HashMap<String, String>();
-		sortedCondition.put(sortedObject, sortedValue);
-		department.setSortedConditions(sortedCondition);
-		QueryResult<Department> queryResult = departmentService.doPaginationQuery(department);
+	}
+		param.setResultList(departmentList);//添加查询条件
+		//-------------------------------添加查询条件end-----------------------------------
+		
+		//-------------------------------添加部门递归查询条件--------------------------------------
+		Map<String, Object> conditionMap = new HashMap<String, Object>();
+		Subject subject = SecurityUtils.getSubject();
+		Session session = subject.getSession();
+		conditionMap.put("departmentKey", session.getAttribute(SESSION_DEPARTMENT_PARAM));
+		param.setConditionMap(conditionMap);
+		//-------------------------------添加部门递归查询条件end-----------------------------------
+		
+		param.setFirstRows((firstResult - 1) * maxResults);
+		param.setMaxRows(maxResults);
+		PageBaseParameter<Department> results = departmentService.queryDepartmentInfo(param);
 		JqGridPageView<Department> departmentListView = new JqGridPageView<Department>();
 		departmentListView.setMaxResults(maxResults);
-		List<Department> departmentCnList = departmentService.queryDepartmentCnList(queryResult.getResultList());
+		List<Department> departmentCnList = departmentService.queryDepartmentCnList(results.getResultList());
 		departmentListView.setRows(departmentCnList);
-		departmentListView.setRecords(queryResult.getTotalCount());
+		departmentListView.setRecords(results.getTotalRows());
 		writeJSON(response, departmentListView);
 	}
 

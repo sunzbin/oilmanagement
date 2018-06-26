@@ -17,9 +17,6 @@ import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import net.sf.json.JSONArray;
-import net.sf.json.JSONObject;
-
 import org.apache.commons.beanutils.ConvertUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.time.DateFormatUtils;
@@ -48,6 +45,7 @@ import com.jeefw.model.sys.Role;
 import com.jeefw.model.sys.SysUser;
 import com.jeefw.service.sys.AttachmentService;
 import com.jeefw.service.sys.AuthorityService;
+import com.jeefw.service.sys.DepartmentService;
 import com.jeefw.service.sys.RoleService;
 import com.jeefw.service.sys.SysUserService;
 
@@ -55,6 +53,8 @@ import core.support.ExtJSBaseParameter;
 import core.support.JqGridPageView;
 import core.support.QueryResult;
 import core.util.JavaEEFrameworkUtils;
+import net.sf.json.JSONArray;
+import net.sf.json.JSONObject;
 
 /**
  * 用户的控制层
@@ -73,6 +73,8 @@ public class SysUserController extends JavaEEFrameworkBaseController<SysUser> im
 	private AuthorityService authorityService;
 	@Resource
 	private RoleService roleService;
+	@Resource
+	private DepartmentService departmentService;
 
 	private static SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
 
@@ -98,6 +100,11 @@ public class SysUserController extends JavaEEFrameworkBaseController<SysUser> im
 		Session session = subject.getSession();
 		session.setAttribute(SESSION_SYS_USER, sysUser);
 		session.setAttribute("ROLE_KEY", sysUser.getRoles().iterator().next().getRoleKey());
+		//将用户所属部门及下属部门存入SESSION
+		String departStr = departmentService.queryRecursionDepartment(sysUser.getDepartmentKey());
+		System.out.println(departStr);
+		session.setAttribute(SESSION_DEPARTMENT_PARAM, departStr);
+		
 		result.put("result", 1);
 		writeJSON(response, result);
 	}

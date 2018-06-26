@@ -13,6 +13,7 @@ import com.jeefw.model.sys.Department;
 import com.jeefw.service.sys.DepartmentService;
 
 import core.service.BaseService;
+import core.support.PageBaseParameter;
 
 /**
  * 部门的业务逻辑层的实现
@@ -48,6 +49,31 @@ public class DepartmentServiceImpl extends BaseService<Department> implements De
 			departmentList.add(department);
 		}
 		return departmentList;
+	}
+
+	/**
+	 * 递归获取所有部门及下属部门
+	 */
+	@Override
+	public String queryRecursionDepartment(String departmentKey) {
+		List<Department> departments = departmentDao.queryByProerties("parentDepartmentkey", departmentKey);
+		String departKeyStr = departmentKey + ",";
+		 if (null != departments && departments.size()>0) {  
+             for (int i = 0; i < departments.size(); i++) {
+            	 Department department = departments.get(i);  
+            	 String subDepartKeyStr = queryRecursionDepartment(department.getDepartmentKey());  
+                 if(subDepartKeyStr != null && !"".equals(subDepartKeyStr)){
+                	 departKeyStr += subDepartKeyStr;
+                 }
+             }
+         }  
+		return departKeyStr;
+	}
+
+	@Override
+	public PageBaseParameter<Department> queryDepartmentInfo(PageBaseParameter<Department> param) {
+		
+		return departmentDao.queryDepartmentInfo(param);
 	}
 
 }

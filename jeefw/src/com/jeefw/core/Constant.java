@@ -18,4 +18,6 @@ public interface Constant {
 	public static final String SESSION_WARNNING_BLUE_PARAM = "SESSION_WARNNING_BLUE_PARAM";
 	
 	public static final String SESSION_WARNNING_PARAM = "SESSION_WARNNING_PARAM";
+	
+	public static final String SESSION_DEPARTMENT_PARAM = "SESSION_DEPARTMENT_PARAM";
 }
