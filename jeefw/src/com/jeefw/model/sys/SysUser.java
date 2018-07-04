@@ -60,6 +60,8 @@ public class SysUser extends SysUserParameter {
 	private String password;
 	@Column(name = "status", nullable = false)
 	private Boolean status;
+	@Column(name = "usercode", nullable = true)
+	private String usercode;
 	@Column(name = "last_logintime")
 	@Temporal(TemporalType.TIMESTAMP)
 	private Date lastLoginTime;
@@ -160,6 +162,15 @@ public class SysUser extends SysUserParameter {
 
 	public void setRoles(Set<Role> roles) {
 		this.roles = roles;
+	}
+	
+
+	public String getUsercode() {
+		return usercode;
+	}
+
+	public void setUsercode(String usercode) {
+		this.usercode = usercode;
 	}
 
 	public boolean equals(Object obj) {

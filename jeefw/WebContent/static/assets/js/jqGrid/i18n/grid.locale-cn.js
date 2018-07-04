@@ -65,6 +65,12 @@ $.extend($.jgrid,{
         bSubmit: "删除",
         bCancel: "取消"
     },
+    resetPass : {
+        caption: "重置密码",
+        msg: "重置密码所选记录？",
+        bSubmit: "确定",
+        bCancel: "取消"
+    },
     nav : {
         edittext: "",
         edittitle: "编辑所选记录",

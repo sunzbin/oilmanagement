@@ -79,12 +79,13 @@
 	
 	<!-- 此注释里代码的作用是应用服务器每次启动都生成索引。在SystemInitListener里执行。可配置，不影响框架使用。 -->
 	<!-- <bean id="informationService" class="com.jeefw.service.sys.impl.InformationServiceImpl" /> -->
-	
+	<!-- 
 	<bean id="indexingInformationJob" class="org.springframework.scheduling.quartz.MethodInvokingJobDetailFactoryBean">
 		<property name="targetObject" ref="informationServiceImpl" />
 		<property name="targetMethod" value="indexingInformation" />
-	</bean>
+	</bean>  -->
 	<!-- 每天凌晨2点执行定时任务，生成索引。 -->
+	<!-- 
 	<bean id="indexingInformationJobTrigger" class="org.springframework.scheduling.quartz.CronTriggerFactoryBean">
 		<property name="jobDetail" ref="indexingInformationJob" />
 		<property name="cronExpression" value="0 0 2 * * ?" />
@@ -96,7 +97,7 @@
 			</list>
 		</property>
 	</bean>
-
+ -->
 	<bean id="updateUserPwdLogicBean" class="com.jeefw.app.logic.UpdateUserPwdLogicServer" />
 
 	<!-- 配置业务逻辑池 -->

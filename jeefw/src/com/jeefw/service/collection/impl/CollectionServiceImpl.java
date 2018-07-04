@@ -164,7 +164,7 @@ public class CollectionServiceImpl extends BaseService<Collection> implements Co
 				jiazhuVol += strs[i];
 				jiazhuVolNum = jiazhuVolNum + "," + strs[i];
 				coll.setJiaZhuVol(jiazhuVolNum);
-				collCn.setJiaZhuVol(Integer.parseInt(jiazhuVol, 16) + "");
+				collCn.setJiaZhuVol(Integer.parseInt(jiazhuVol, 16) + "g");
 				
 			}else if(i == 16){//修程
 				if("01".equals(strs[i])){
@@ -181,13 +181,17 @@ public class CollectionServiceImpl extends BaseService<Collection> implements Co
 			}else if(i == 17){//油脂类型
 				
 				coll.setOilType(strs[i]);
-				collCn.setOilType(strs[i]);
+				if("00".equals(strs[i])){
+					collCn.setOilType("无");
+				}else{
+					collCn.setOilType(strs[i]);
+				}
 				
 			}else if(i == 18){//电量
 				
 				coll.setElec(strs[i]);
 			    int b = Integer.parseInt(strs[i], 16);
-				collCn.setElec(b + "");
+				collCn.setElec(b + "%");
 				
 			}else if(i == 19 || i == 20 || i == 21 || i == 22 || i == 23 || i == 24){//加注时间（6byte）-------------------------------------------------------
 				

@@ -46,7 +46,7 @@
 
         		jQuery(grid_selector).jqGrid({
         			subGrid : false,
-        			url : "${contextPath}/coll/collcn/getColl",
+        			url : "${contextPath}/coll/collcn/getColl?param=1",
         			datatype : "json",
         			height : 450,
         			colNames : [ '段号', '设备号', '车型编号', '车号', '轴位', '加注点', '加注量', '修程', '加注时间','电量','操作人','预警信息'],

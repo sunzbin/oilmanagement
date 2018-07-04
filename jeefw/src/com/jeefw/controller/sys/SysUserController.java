@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.net.URLDecoder;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
@@ -41,6 +42,7 @@ import com.jeefw.core.Constant;
 import com.jeefw.core.JavaEEFrameworkBaseController;
 import com.jeefw.model.sys.Attachment;
 import com.jeefw.model.sys.Authority;
+import com.jeefw.model.sys.Department;
 import com.jeefw.model.sys.Role;
 import com.jeefw.model.sys.SysUser;
 import com.jeefw.service.sys.AttachmentService;
@@ -51,6 +53,7 @@ import com.jeefw.service.sys.SysUserService;
 
 import core.support.ExtJSBaseParameter;
 import core.support.JqGridPageView;
+import core.support.PageBaseParameter;
 import core.support.QueryResult;
 import core.util.JavaEEFrameworkUtils;
 import net.sf.json.JSONArray;
@@ -214,13 +217,22 @@ public class SysUserController extends JavaEEFrameworkBaseController<SysUser> im
 	// 更改密码
 	@RequestMapping("/resetPassword")
 	public void resetPassword(HttpServletRequest request, HttpServletResponse response) throws IOException {
-		String password = request.getParameter("password");
-		Long id = ((SysUser) request.getSession().getAttribute(SESSION_SYS_USER)).getId();
-		// sysUserService.updateByProperties("id", id, "password", MD5.crypt(password));
-		sysUserService.updateByProperties("id", id, "password", new Sha256Hash(password).toHex());
-		Map<String, Object> result = new HashMap<String, Object>();
-		result.put("success", true);
-		writeJSON(response, result);
+		String ids = request.getParameter("ids");
+		if(ids != null){
+			String[] idAry = ids.split(",");
+			String password = "123456"; 	//重置密码默认密码
+			for(int i = 0; i< idAry.length; i++){
+				sysUserService.updateByProperties("id",Long.valueOf( idAry[i]).longValue(), "password", new Sha256Hash(password).toHex());
+			}
+			Map<String, Object> result = new HashMap<String, Object>();
+			result.put("success", true);
+			writeJSON(response, result);
+		}else{
+			Map<String, Object> result = new HashMap<String, Object>();
+			result.put("success", false);
+			writeJSON(response, result);
+		}
+
 	}
 
 	// 查询用户的表格，包括分页、搜索和排序
@@ -263,6 +275,60 @@ public class SysUserController extends JavaEEFrameworkBaseController<SysUser> im
 		sysUserListView.setRecords(queryResult.getTotalCount());
 		writeJSON(response, sysUserListView);
 	}
+	
+	// 查询用户的表格，包括分页、搜索和排序(New)
+	@RequestMapping(value = "/getSysUserNew", method = { RequestMethod.POST, RequestMethod.GET })
+	public void getSysUserNew(HttpServletRequest request, HttpServletResponse response) throws Exception {
+		Integer firstResult = Integer.valueOf(request.getParameter("page"));
+		Integer maxResults = Integer.valueOf(request.getParameter("rows"));
+		String sortedObject = request.getParameter("sidx");
+		String sortedValue = request.getParameter("sord");
+		String filters = request.getParameter("filters");
+		SysUser sysUser = new SysUser();
+		PageBaseParameter<SysUser> param = new PageBaseParameter<SysUser>();
+		
+		//-------------------------------添加查询条件-----------------------------------
+		List<SysUser> sysUserList = new ArrayList<SysUser>();
+		if (StringUtils.isNotBlank(filters)) {
+		JSONObject jsonObject = JSONObject.fromObject(filters);
+		JSONArray jsonArray = (JSONArray) jsonObject.get("rules");
+		for (int i = 0; i < jsonArray.size(); i++) {
+			JSONObject result = (JSONObject) jsonArray.get(i);
+			if (result.getString("field").equals("email") && result.getString("op").equals("eq")) {
+				sysUser.setEmail(result.getString("data"));
+			}
+			if (result.getString("field").equals("userName") && result.getString("op").equals("cn")) {
+				sysUser.setUserName(result.getString("data"));
+			}
+			if (((String) jsonObject.get("groupOp")).equalsIgnoreCase("OR")) {
+				sysUser.setFlag("OR");
+			} else {
+				sysUser.setFlag("AND");
+			}
+			sysUserList.add(sysUser);
+		}
+	}
+		param.setResultList(sysUserList);//添加查询条件
+		//-------------------------------添加查询条件end-----------------------------------
+		
+		//-------------------------------添加部门递归查询条件--------------------------------------
+		Map<String, Object> conditionMap = new HashMap<String, Object>();
+		Subject subject = SecurityUtils.getSubject();
+		Session session = subject.getSession();
+		conditionMap.put("departmentKey", session.getAttribute(SESSION_DEPARTMENT_PARAM));
+		param.setConditionMap(conditionMap);
+		//-------------------------------添加部门递归查询条件end-----------------------------------
+		
+		param.setFirstRows((firstResult - 1) * maxResults);
+		param.setMaxRows(maxResults);
+		PageBaseParameter<SysUser> results = sysUserService.querySysUserInfo(param);
+		JqGridPageView<SysUser> sysUserListView = new JqGridPageView<SysUser>();
+		sysUserListView.setMaxResults(maxResults);
+		List<SysUser> sysUserCnList = sysUserService.querySysUserCnList(results.getResultList());
+		sysUserListView.setRows(sysUserCnList);
+		sysUserListView.setRecords(results.getTotalRows());
+		writeJSON(response, sysUserListView);
+	}
 
 	// 保存用户的实体Bean
 	@RequestMapping(value = "/saveSysUser", method = { RequestMethod.POST, RequestMethod.GET })
@@ -275,7 +341,7 @@ public class SysUserController extends JavaEEFrameworkBaseController<SysUser> im
 			sysUserService.merge(entity);
 		} else if (CMD_NEW.equals(parameter.getCmd())) {
 			// entity.setPassword(MD5.crypt("123456")); // 初始化密码为123456
-			entity.setPassword(new Sha256Hash("000000").toHex()); // 初始化密码为000000
+			entity.setPassword(new Sha256Hash("123456").toHex()); // 初始化密码为000000
 			sysUserService.persist(entity);
 		}
 		parameter.setSuccess(true);
@@ -328,6 +394,7 @@ public class SysUserController extends JavaEEFrameworkBaseController<SysUser> im
 				entity.setSex(Short.valueOf(request.getParameter("sexCn")));
 				entity.setEmail(email);
 				entity.setPhone(request.getParameter("phone"));
+				entity.setUsercode(request.getParameter("usercode"));
 				if (StringUtils.isNotBlank(request.getParameter("birthday"))) {
 					entity.setBirthday(dateFormat.parse(request.getParameter("birthday")));
 				}

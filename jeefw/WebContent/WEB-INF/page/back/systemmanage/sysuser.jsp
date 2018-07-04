@@ -6,13 +6,18 @@
 <link rel="stylesheet" href="${contextPath}/static/assets/css/jquery-ui.css" />
 <link rel="stylesheet" href="${contextPath}/static/assets/css/datepicker.css" />
 <link rel="stylesheet" href="${contextPath}/static/assets/css/ui.jqgrid.css" />
+<link rel="stylesheet" href="${contextPath}/static/assets/css/jquery-ui.custom.css" />
+<link rel="stylesheet" href="${contextPath}/static/assets/css/jquery.gritter.css" />
+<link rel="stylesheet" href="${contextPath}/static/assets/css/select2.css" />
+<link rel="stylesheet" href="${contextPath}/static/assets/css/bootstrap-editable.css" />
+
 
 <div class="row">
 	<div class="col-xs-12">
 		<table id="grid-table"></table>
 
 		<div id="grid-pager"></div>
-
+		
 		<script type="text/javascript">
 			var $path_base = "${contextPath}/static";//in Ace demo this will be used for editurl parameter
 		</script>
@@ -23,7 +28,7 @@
 
 <!-- page specific plugin scripts -->
 <script type="text/javascript">
-		var scripts = [ null, "${contextPath}/static/assets/js/date-time/bootstrap-datepicker.js", "${contextPath}/static/assets/js/date-time/locales/bootstrap-datepicker.zh-CN.js", "${contextPath}/static/assets/js/jqGrid/jquery.jqGrid.js", "${contextPath}/static/assets/js/jqGrid/i18n/grid.locale-cn.js", null ]
+		var scripts = [ null, "${contextPath}/static/assets/js/date-time/bootstrap-datepicker.js", "${contextPath}/static/assets/js/date-time/locales/bootstrap-datepicker.zh-CN.js", "${contextPath}/static/assets/js/jqGrid/jquery.jqGrid.js", "${contextPath}/static/assets/js/jqGrid/i18n/grid.locale-cn.js", "${contextPath}/static/assets/js/jquery-ui.custom.js","${contextPath}/static/assets/js/jquery.ui.touch-punch.js","${contextPath}/static/assets/js/jquery.gritter.js","${contextPath}/static/assets/js/select2.js","${contextPath}/static/assets/js/x-editable/bootstrap-editable.js","${contextPath}/static/assets/js/x-editable/ace-editable.js",null ]
         $('.page-content-area').ace_ajax('loadScripts', scripts, function() {
         	// inline scripts related to this page
         	jQuery(function($) {
@@ -47,10 +52,10 @@
 
         		jQuery(grid_selector).jqGrid({
         			subGrid : false,
-        			url : "${contextPath}/sys/sysuser/getSysUser",
+        			url : "${contextPath}/sys/sysuser/getSysUserNew",
         			datatype : "json",
         			height : 450,
-        			colNames : ['', 'ID', '姓名', '性别', '邮箱', '联系电话', '生日', '所属部门', '角色', '是否禁用', '最后登录时间'],
+        			colNames : ['', 'ID','用户编码', '姓名', '性别', '邮箱', '联系电话', '生日', '所属部门', '角色', '是否禁用', '最后登录时间'],
         			colModel : [ {
         				name : '',
         				index : '',
@@ -75,11 +80,20 @@
         				width : 60,
         				sorttype : "long",
         				search : false
+        			},  {
+        				name : 'usercode',
+        				index : 'usercode',
+        				label : '用户编码',
+        				width : 80,
+        				editable : true,
+        				editoptions : {size : "20", maxlength : "50"},
+        				searchoptions : {sopt : ['cn']},
+        				editrules : {required : true}
         			}, {
         				name : 'userName',
         				index : 'userName',
         				label : '姓名',
-        				width : 100,
+        				width : 80,
         				editable : true,
         				editoptions : {size : "20", maxlength : "50"},
         				searchoptions : {sopt : ['cn']},
@@ -88,7 +102,7 @@
         				name : 'sexCn',
         				index : 'sex',
         				label : '性别',
-        				width : 80,
+        				width : 60,
         				editable : true,
         				edittype : "select",
         				editoptions : {value : "1:男;2:女"},
@@ -97,7 +111,7 @@
         				name : 'email',
         				index : 'email',
         				label : '邮箱',
-        				width : 160,
+        				width : 150,
         				editable : true,
         				editoptions : {size : "20", maxlength : "30"},
         				searchoptions : {sopt : ['eq']},
@@ -106,7 +120,7 @@
         				name : 'phone',
         				index : 'phone',
         				label : '联系电话',
-        				width : 110,
+        				width : 100,
         				editable : true,
         				editoptions : {size : "20", maxlength : "20"},
         				search : false
@@ -148,7 +162,7 @@
         				name : 'statusCn',
         				index : 'status',
         				label : '是否禁用',
-        				width : 80,
+        				width : 60,
         				editable : true,
         				edittype : "checkbox",
         				editoptions : {value : "是:否"},
@@ -305,31 +319,26 @@
         		if(<shiro:hasPermission name="${ROLE_KEY}:sysuser:export">true</shiro:hasPermission><shiro:lacksPermission name="${ROLE_KEY}:sysuser:export">false</shiro:lacksPermission>){
     				jQuery(grid_selector).jqGrid('navButtonAdd', pager_selector,{
    					   caption : "",
-   				       title : "导出Excel",
-   				       buttonicon : "ace-icon fa fa-file-excel-o green", 
+   				       title : "重置密码",
+   				       buttonicon : "ace-icon fa fa-undo", 
    				       onClickButton : function () { 
-   				    	   var keys = [], ii = 0, rows = "";
-   				    	   var ids = $(grid_selector).getDataIDs(); // Get All IDs
-   				    	   var row = $(grid_selector).getRowData(ids[0]); // Get First row to get the labels
-   				    	   //var label = $(grid_selector).jqGrid('getGridParam','colNames');
-   	   			    	   for (var k in row) {
-   				    	   	   keys[ii++] = k; // capture col names
-   				    	   	   rows = rows + k + "\t"; // output each Column as tab delimited
-   				    	   }
-   				    	   rows = rows + "\n"; // Output header with end of line
-   				    	   for (i = 0; i < ids.length; i++) {
-   				    	   	   row = $(grid_selector).getRowData(ids[i]); // get each row
-   				    	   	   for (j = 0; j < keys.length; j++)
-   				    	   		   rows = rows + row[keys[j]] + "\t"; // output each Row as tab delimited
-   				    	   	   rows = rows + "\n"; // output each row with end of line
-   				    	   }
-   				    	   rows = rows + "\n"; // end of line at the end
-   				    	   var form = "<form name='csvexportform' action='${contextPath}/sys/sysuser/operateSysUser?oper=excel' method='post'>";
-   				    	   form = form + "<input type='hidden' name='csvBuffer' value='" + encodeURIComponent(rows) + "'>";
-   				    	   form = form + "</form><script>document.csvexportform.submit();</sc" + "ript>";
-   				    	   OpenWindow = window.open('', '');
-   				    	   OpenWindow.document.write(form);
-   				    	   OpenWindow.document.close();
+   				    	   	//var ids = $(grid_selector).getDataIDs(); // Get All IDs
+							var label = $(grid_selector).jqGrid('getGridParam','selarrrow') +'';
+							$.ajax({
+								dataType : "json",
+								url : "${contextPath}" + "/sys/sysuser/resetPassword",
+								type : "post",
+								data : {
+									ids : label
+								},
+								complete : function(xmlRequest) {
+									$.gritter.add({
+						                title: '系统信息',
+						                text: '密码修改成功',
+						                class_name: 'gritter-success gritter-center'
+						            });
+								}
+							});
    				       } 
    					});
         		}
@@ -447,6 +456,8 @@
         			$('.ui-jqdialog').remove();
         		});
         		
+        		
         	});
         });
+        
 </script>

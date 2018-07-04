@@ -1,8 +1,10 @@
 package com.jeefw.dao.sys;
 
+import com.jeefw.model.sys.Department;
 import com.jeefw.model.sys.SysUser;
 
 import core.dao.Dao;
+import core.support.PageBaseParameter;
 
 /**
  * 用户的数据持久层的接口
@@ -11,5 +13,8 @@ import core.dao.Dao;
 public interface SysUserDao extends Dao<SysUser> {
 
 	String getRoleValueBySysUserId(Long sysUserId);
+	
+	//获取分页部门信息
+	public PageBaseParameter<SysUser> querySysUserInfo(PageBaseParameter<SysUser> param);
 
 }

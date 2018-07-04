@@ -19,6 +19,7 @@ import com.jeefw.model.sys.SysUser;
 import com.jeefw.service.sys.SysUserService;
 
 import core.service.BaseService;
+import core.support.PageBaseParameter;
 
 /**
  * 用户的业务逻辑层的实现
@@ -47,6 +48,7 @@ public class SysUserServiceImpl extends BaseService<SysUser> implements SysUserS
 			sysUser.setId(entity.getId());
 			sysUser.setUserName(entity.getUserName());
 			sysUser.setSex(entity.getSex());
+			sysUser.setUsercode(entity.getUsercode());
 			if (entity.getSex() == 1) {
 				sysUser.setSexCn("男");
 			} else if (entity.getSex() == 2) {
@@ -99,6 +101,12 @@ public class SysUserServiceImpl extends BaseService<SysUser> implements SysUserS
 		brb.setPassword(new Sha256Hash(brb.getPassword()).toHex());
 		sysUserDao.updateByProperties("userName", brb.getUsername(), "password", brb.getPassword());
 		return "success";
+	}
+
+	@Override
+	public PageBaseParameter<SysUser> querySysUserInfo(PageBaseParameter<SysUser> param) {
+		
+		return sysUserDao.querySysUserInfo(param);
 	}
 
 }

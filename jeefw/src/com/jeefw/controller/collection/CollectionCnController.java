@@ -57,6 +57,7 @@ public class CollectionCnController extends JavaEEFrameworkBaseController<Collec
 		Integer firstResult = Integer.valueOf(request.getParameter("page"));
 		Integer maxResults = Integer.valueOf(request.getParameter("rows"));
 		String sortedObject = request.getParameter("sidx");
+		String xiuChengparam = request.getParameter("param");
 		String sortedValue = request.getParameter("sord");
 		String filters = request.getParameter("filters");
 		CollectionCn coll = new CollectionCn();
@@ -65,9 +66,6 @@ public class CollectionCnController extends JavaEEFrameworkBaseController<Collec
 			JSONArray jsonArray = (JSONArray) jsonObject.get("rules");
 			for (int i = 0; i < jsonArray.size(); i++) {
 				JSONObject result = (JSONObject) jsonArray.get(i);
-//				if (result.getString("field").equals("operatorId") && result.getString("op").equals("eq")) {
-//					coll.set$eq_collectionKey(result.getString("data"));
-//				}
 				if (result.getString("field").equals("operatorId") && result.getString("op").equals("cn")) {
 					coll.set$like_collectionValue(result.getString("data"));
 				}
@@ -78,11 +76,17 @@ public class CollectionCnController extends JavaEEFrameworkBaseController<Collec
 				coll.setFlag("AND");
 			}
 		}
+		if("1".equals(xiuChengparam)){
+			coll.set$like_xiuCheng("定修");
+			coll.setFlag("AND");
+		}
 		coll.setFirstResult((firstResult - 1) * maxResults);
 		coll.setMaxResults(maxResults);
 		Map<String, String> sortedCondition = new HashMap<String, String>();
+//		Map<String, Object> dynamicProperties = new HashMap<String, Object>();
 		sortedCondition.put(sortedObject, sortedValue);
 		coll.setSortedConditions(sortedCondition);
+//		coll.setDynamicProperties(dynamicProperties);
 		QueryResult<CollectionCn> queryResult = collectionCnService.doPaginationQuery(coll);
 		JqGridPageView<CollectionCn> dictListView = new JqGridPageView<CollectionCn>();
 		dictListView.setMaxResults(maxResults);

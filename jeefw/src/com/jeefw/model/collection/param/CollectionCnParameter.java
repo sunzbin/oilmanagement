@@ -22,6 +22,8 @@ public class CollectionCnParameter extends ExtJSBaseParameter{
 	private String $eq_collectionKey;
 	
 	private String $like_collectionValue;
+	
+	private String $like_xiuCheng;
 
 	public String get$eq_collectionKey() {
 		return $eq_collectionKey;
@@ -39,7 +41,13 @@ public class CollectionCnParameter extends ExtJSBaseParameter{
 		this.$like_collectionValue = $like_collectionValue;
 	}
 
-	
-	
+	public String get$like_xiuCheng() {
+		return $like_xiuCheng;
+	}
+
+	public void set$like_xiuCheng(String $like_xiuCheng) {
+		this.$like_xiuCheng = $like_xiuCheng;
+	}
+
 
 }
